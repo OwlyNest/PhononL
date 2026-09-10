@@ -1,0 +1,18 @@
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = PhononBoot
+  FILE_GUID      = A399F12E-92D1-4AE4-B082-17C6580E7E1E
+  MODULE_TYPE    = UEFI_APPLICATION
+  VERSION_STRING = 0.1
+  ENTRY_POINT    = UefiMain
+
+[Sources]
+  PhononBoot.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
