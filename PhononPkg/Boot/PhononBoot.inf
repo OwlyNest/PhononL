@@ -8,6 +8,12 @@
 
 [Sources]
   PhononBoot.c
+  FileIO.c
+  Elf.c
+  Graphics.c
+  Memory.c
+  Acpi.c
+  Handoff.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -16,3 +22,9 @@
   UefiApplicationEntryPoint
   UefiLib
   UefiBootServicesTableLib
+
+[Protocols]
+  gEfiLoadedImageProtocolGuid
+
+[Guids]
+  gEfiFileInfoGuid   

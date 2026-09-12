@@ -6,7 +6,7 @@ $Rebuild = $true
 $Full = $true
 $Arch = "X64"
 $Toolchain = "GCC"
-$date = Get-Date -Format yyyy-MM-dd
+#$date = Get-Date -Format yyyy-MM-dd
 
 # Bring in WORKSPACE / PACKAGES_PATH / EDK_TOOLS_PATH / PATH
 . "$PSScriptRoot/setup.ps1"
@@ -179,6 +179,7 @@ $qemuArgs = @(
     "-net", "none",
     "-display", "gtk",
     "-rtc", "base=localtime"
+    #"-d", "int,cpu_reset"
 )
 
 & qemu-system-x86_64 @qemuArgs
