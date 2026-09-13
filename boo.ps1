@@ -2,25 +2,31 @@ $ErrorActionPreference = "Stop"
 $ErrorView = 'ConciseView'
 
 $VerboseBuild = $false
-$Rebuild = $true
-$Full = $true
-$Arch = "X64"
-$Toolchain = "GCC"
-#$date = Get-Date -Format yyyy-MM-dd
+$Rebuild      = $true
+$Full         = $true
+$Arch         = "X64"
+$Toolchain    = "GCC"
+#$date         = Get-Date -Format yyyy-MM-dd
 
 # Bring in WORKSPACE / PACKAGES_PATH / EDK_TOOLS_PATH / PATH
 . "$PSScriptRoot/setup.ps1"
 
-foreach ($arg in $args) {
-    switch ($arg) {
-        "--verbose" { $VerboseBuild = $true }
-        "-v" { $VerboseBuild = $true }
+$UsbDevice = $null
+
+for ($i = 0; $i -lt $args.Length; $i++) {
+    switch ($args[$i]) {
+        "--verbose"    { $VerboseBuild = $true }
+        "-v"           { $VerboseBuild = $true }
 
         "--no-rebuild" { $Rebuild = $false }
-        "-nr" { $Rebuild = $false }
+        "-nr"          { $Rebuild = $false }
 
-        "--partial" { $Full = $false }
-        "-p" { $Full = $false }
+        "--partial"    { $Full = $false }
+        "-p"           { $Full = $false }
+
+        # Takes the next argument as the target block device, e.g.
+        # ./boo.ps1 --usb /dev/sdb
+        "--usb"        { $i++; $UsbDevice = $args[$i] }
     }
 }
 
@@ -31,7 +37,7 @@ function Run {
 
     $parts = $CommandLine -split " "
 
-    $Command = $parts[0]
+    $Command   = $parts[0]
     $Arguments = $parts[1..($parts.Length - 1)]
 
     if ($VerboseBuild) {
@@ -44,6 +50,54 @@ function Run {
     if ($LASTEXITCODE -ne 0) {
         throw "Command failed: $Command (exit code $LASTEXITCODE)"
     }
+}
+
+function Get-CandidateDrives {
+    # Whole disks only (-d), not partitions — RM marks removable media,
+    # which is what a USB stick should show up as.
+    Write-Host ""
+    Write-Host "Available block devices:"
+    & lsblk -dpno NAME,SIZE,RM,MODEL |
+        ForEach-Object { Write-Host "  $_" }
+    Write-Host ""
+}
+
+function Invoke-FlashUsb {
+    param([string]$Device)
+
+    if ([string]::IsNullOrWhiteSpace($Device)) {
+        Write-Host "[x] No device given, skipping flash."
+        return
+    }
+
+    if (!(Test-Path $Device)) {
+        throw "Device '$Device' does not exist."
+    }
+
+    # Refuse to flash whatever disk the running system's root actually
+    # lives on — a typo here (sda vs sdb) is exactly the kind of mistake
+    # this check exists for.
+    $RootSource = & findmnt -no SOURCE / 2>$null
+    if ($RootSource -and $RootSource.StartsWith($Device)) {
+        throw "Refusing to flash '$Device' — it appears to hold your root filesystem."
+    }
+
+    Write-Host ""
+    Write-Host "[!] About to overwrite ALL data on $Device with phonon.iso." -ForegroundColor Red
+    $Confirm = Read-Host "Type the device path again to confirm ($Device)"
+    if ($Confirm -ne $Device) {
+        Write-Host "[x] Confirmation did not match — aborting flash, no changes made."
+        return
+    }
+
+    Write-Host "[x] Flashing phonon.iso -> $Device ..."
+    & sudo dd if=phonon.iso of=$Device bs=4M status=progress conv=fsync
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "dd failed (exit code $LASTEXITCODE)"
+    }
+
+    Write-Host "[x] Flash complete."
 }
 
 # Don't "optimize" or change this, you WILL break the line count
@@ -113,6 +167,17 @@ if ($Rebuild) {
         throw "Build reported success but $EfiOut is missing — check the build log."
     }
 
+    Write-Host "[x] Building Shadow..."
+    if ($Full) {
+        Run "make -C Shadow clean"
+    }
+    Run "make -C Shadow"
+
+    $ShadowElf = "Shadow/SHADOW.ELF"
+    if (!(Test-Path $ShadowElf)) {
+        throw "Shadow build reported success but $ShadowElf is missing."
+    }
+
     Write-Host "[x] Preparing ISO directory structure..."
 
     # Reset the staging directory cleanly
@@ -124,15 +189,24 @@ if ($Rebuild) {
         "isodir\EFI\BOOT\BOOTX64.EFI" `
         -Force
 
+    Copy-Item `
+        $ShadowElf `
+        "isodir\SHADOW.ELF" `
+        -Force
+
     Write-Host "[x] Building EFI system partition image..."
 
     # A small FAT image is what actually gets El Torito-booted by firmware;
-    # the ISO itself is just a carrier for it.
+    # the ISO itself is just a carrier for it. This is the volume
+    # FileIoReadFile actually reads from — the outer ISO9660/Joliet tree in
+    # isodir/ is not what UEFI mounts as the boot device, so SHADOW.ELF has
+    # to be copied in here too, not just into isodir.
     if (Test-Path "esp.img") { Remove-Item "esp.img" -Force }
-    Run "dd if=/dev/zero of=esp.img bs=1M count=4"
+    Run "dd if=/dev/zero of=esp.img bs=1M count=16"
     Run "mkfs.vfat esp.img"
     Run "mmd -i esp.img ::/EFI ::/EFI/BOOT"
     Run "mcopy -i esp.img isodir/EFI/BOOT/BOOTX64.EFI ::/EFI/BOOT/BOOTX64.EFI"
+    Run "mcopy -i esp.img isodir/SHADOW.ELF ::/SHADOW.ELF"
     Copy-Item "esp.img" "isodir\esp.img" -Force
 
     Write-Host "[x] Creating EFI-bootable ISO via xorriso..."
@@ -155,6 +229,17 @@ if ($Rebuild) {
     xorriso -indev phonon.iso -ls /EFI/BOOT
 }
 
+
+if (Test-Path "phonon.iso") {
+    if ($UsbDevice) {
+        Invoke-FlashUsb -Device $UsbDevice
+    }
+    else {
+        Get-CandidateDrives
+        $Chosen = Read-Host "Device to flash phonon.iso to (leave empty to skip)"
+        Invoke-FlashUsb -Device $Chosen
+    }
+}
 
 Write-Host "[x] Launching QEMU..."
 
@@ -179,7 +264,6 @@ $qemuArgs = @(
     "-net", "none",
     "-display", "gtk",
     "-rtc", "base=localtime"
-    #"-d", "int,cpu_reset"
 )
 
 & qemu-system-x86_64 @qemuArgs

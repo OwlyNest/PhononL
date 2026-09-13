@@ -19,11 +19,18 @@
  */
 
 /* --- Macros ---*/
-
+#ifndef __ACPI_H__
+#define __ACPI_H__
 /* --- Includes ---*/
+#include <Uefi.h>
 
+#include <info.h>
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+EFI_STATUS AcpiFindRsdp(
+    IN OUT PPhononBootInfo Info
+);
+#endif /* __ACPI_H__ */

@@ -22,9 +22,15 @@
   UefiApplicationEntryPoint
   UefiLib
   UefiBootServicesTableLib
+  BaseLib
+  BaseMemoryLib
 
 [Protocols]
   gEfiLoadedImageProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiGraphicsOutputProtocolGuid
 
 [Guids]
-  gEfiFileInfoGuid   
+  gEfiFileInfoGuid
+  gEfiAcpi10TableGuid
+  gEfiAcpi20TableGuid

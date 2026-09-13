@@ -93,7 +93,13 @@ EFI_STATUS FileIOReadFile(
         goto CloseAndReturn;
     }
 
-    Status = File->GetInfo(File, &gEfiFileInfoGuid, &FileSize, FileInfo);
+    // Bug fix: this must pass &FileInfoSize (the size of the FileInfo
+    // buffer we just allocated), not &FileSize (an uninitialized local at
+    // this point). Passing uninitialized stack garbage as a buffer-size
+    // argument is undefined behavior — it happened to work here, but
+    // GetInfo has no way to know the real buffer size without it, and a
+    // large enough garbage value would let it write past the allocation.
+    Status = File->GetInfo(File, &gEfiFileInfoGuid, &FileInfoSize, FileInfo);
     if (EFI_ERROR(Status)) {
         Print(L"[!] GetInfo failed: %r\n", Status);
         gBS->FreePool(FileInfo);
@@ -110,13 +116,19 @@ EFI_STATUS FileIOReadFile(
 
     Status = File->Read(File, &FileSize, FileBuffer);
     if (EFI_ERROR(Status)) {
+        // Bug fix: this fell through to `*Buffer = FileBuffer;` below even
+        // on failure, handing the caller a pointer to memory that was just
+        // freed. The caller happens to check Status before touching
+        // Buffer, so this was never actually exploited by anything — but
+        // it's the kind of implicit "well it happens to be fine" gap this
+        // rewrite exists to not have.
         Print(L"[!] Read failed: %r\n", Status);
         gBS->FreePool(FileBuffer);
+        goto CloseAndReturn;
     }
 
     *Buffer     = FileBuffer;
     *BufferSize = FileSize;
-
 
 CloseAndReturn:
     File->Close(File);

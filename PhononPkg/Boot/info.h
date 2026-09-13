@@ -16,6 +16,12 @@
     }                                                                          \
   } while (0)
 
+// Phonon's own pixel format constants — deliberately not EFI_GRAPHICS_
+// PIXEL_FORMAT values. Shadow should never need to know GOP exists.
+#define PHONON_PIXEL_FORMAT_UNKNOWN 0
+#define PHONON_PIXEL_FORMAT_RGB8    1 // 8-bit R,G,B, byte order R,G,B,_
+#define PHONON_PIXEL_FORMAT_BGR8    2 // 8-bit B,G,R, byte order B,G,R,_
+
 typedef struct {
   uint64_t magic;
   uint32_t version;

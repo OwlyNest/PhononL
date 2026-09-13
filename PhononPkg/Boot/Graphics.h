@@ -21,9 +21,14 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include <Uefi.h>
 
+#include <info.h>
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+EFI_STATUS GraphicsInit(
+    IN OUT PPhononBootInfo Info
+);

@@ -19,13 +19,20 @@
  */
 
 /* --- Macros ---*/
+#ifndef __MEMORY_H__
+#define __MEMORY_H__
+/* --- Includes ---*/   
+#include <Uefi.h>
 
-/* --- Includes ---*/
-
+#include <info.h>
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+EFI_STATUS MemoryExitBootServices(
+    IN EFI_HANDLE ImageHandle,
+    IN OUT PPhononBootInfo Info
+);
 
-/* --- Main ---*/
+#endif /* __MEMORY_H__ */

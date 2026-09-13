@@ -19,11 +19,24 @@
  */
 
 /* --- Macros ---*/
-
+#ifndef __HANDOFF_H__
+#define __HANDOFF_H__
 /* --- Includes ---*/
+#include <Uefi.h>
 
+#include <info.h>
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+
+// Never returns: jumps directly into KernelEntry and does not come back.
+// If the kernel entry point ever does return, there is nothing sensible
+// left to fall back to (boot services are long gone by this point).
+VOID HandoffJump(
+    IN VOID *KernelEntry,
+    IN OUT PPhononBootInfo Info
+);
+
+#endif /* __HANDOFF_H__ */

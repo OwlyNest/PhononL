@@ -21,11 +21,40 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include <Uefi.h>
 
+#include <Handoff.h>
 /* --- Typedefs - Structs - Enums ---*/
+
+/* Deliberately NOT EFIAPI: EFIAPI forces the Microsoft x64 calling
+ * convention (arguments in RCX/RDX/...), which is what UEFI protocol
+ * calls use under the hood. Shadow's _start is a plain SysV AMD64
+ * function — first argument in RDI — which is GCC's default calling
+ * convention on this target when no attribute overrides it. Tagging this
+ * EFIAPI would silently mismatch the ABI Shadow's entry point expects.
+*/
+typedef VOID (*PHONON_KERNEL_ENTRY)(
+    PPhononBootInfo Info
+);
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
 
 /* --- Functions ---*/
+VOID HandoffJump(
+    IN VOID *KernelEntry,
+    IN OUT PPhononBootInfo Info
+) {
+    PHONON_KERNEL_ENTRY Entry = (PHONON_KERNEL_ENTRY)(UINTN)KernelEntry;
+
+    Entry(Info);
+
+    /* Should never reach here — Shadow's entry point isn't supposed to
+     * return. If it somehow does, there's nothing left to fall back to
+     * (boot services are gone), so just stop the CPU cleanly.
+    */
+    for (;;) {
+        __asm__ __volatile__("cli\n\thlt");
+    }
+}
