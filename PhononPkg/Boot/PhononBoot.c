@@ -1,4 +1,3 @@
-#include "Memory.h"
 #include <Uefi.h>
 
 #include <Library/UefiBootServicesTableLib.h>
@@ -11,11 +10,13 @@
 #include <Graphics.h>
 #include <Acpi.h>
 #include <Handoff.h>
+#include <Memory.h>
 
 EFI_STATUS EFIAPI UefiMain(
   IN EFI_HANDLE ImageHandle,
   IN EFI_SYSTEM_TABLE *SystemTable
 ) {
+
     EFI_STATUS Status;
     VOID *FileBuffer;
     UINTN FileSize;

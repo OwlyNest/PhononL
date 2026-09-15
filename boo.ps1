@@ -168,10 +168,13 @@ if ($Rebuild) {
     }
 
     Write-Host "[x] Building Shadow..."
+    Shadow/generate_build_mks.ps1
     if ($Full) {
         Run "make -C Shadow clean"
+        Run "bear -- make -C Shadow -j6"
+    } else {
+        Run "make -C Shadow -j6"
     }
-    Run "make -C Shadow"
 
     $ShadowElf = "Shadow/SHADOW.ELF"
     if (!(Test-Path $ShadowElf)) {
@@ -256,8 +259,8 @@ $qemuArgs = @(
     "-cdrom", "phonon.iso",
     "-m", "256",
     "-no-reboot",
-    "-serial", "stdio",
-    "-monitor", "none",
+    "-serial", "none",
+    "-monitor", "stdio",
     "-machine", "q35",
     "-drive", "if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd",
     "-drive", "if=pflash,format=raw,file=OVMF_VARS.4m.fd",
