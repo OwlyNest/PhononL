@@ -257,16 +257,17 @@ if (!(Test-Path "OVMF_VARS.4m.fd")) {
 $qemuArgs = @(
     "-cpu", "max",
     "-cdrom", "phonon.iso",
-    "-m", "256",
+    "-m", "256M",
     "-no-reboot",
-    "-serial", "none",
+    "-serial", "file:SERIAL.TXT",
     "-monitor", "stdio",
     "-machine", "q35",
     "-drive", "if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd",
     "-drive", "if=pflash,format=raw,file=OVMF_VARS.4m.fd",
     "-net", "none",
     "-display", "gtk",
-    "-rtc", "base=localtime"
+    "-rtc", "base=localtime",
+    "-d", "int,cpu_reset"
 )
 
 & qemu-system-x86_64 @qemuArgs

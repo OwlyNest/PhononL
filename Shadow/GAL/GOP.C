@@ -22,9 +22,6 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
-#include "GAL/GAL.H"
-#include "GFX/FB.H"
-#include "Internal/Types.H"
 #include <GAL/GOP.H>
 #include <info.h>
 
@@ -32,6 +29,7 @@
 
 /* --- Globals ---*/
 static PPhononBootInfo boot_info;
+static VIRT_ADDR_T GopVirtualBase = 0;
 
 /* --- Prototypes ---*/
 
@@ -133,7 +131,10 @@ static PVOID GAL_GOPGetFrameBuffer(
 	 * Good plan, me!
 	*/
 
-	return (PVOID)(UINT_PTR)boot_info->framebuffer_base;
+	if (GopVirtualBase != 0) {
+        return (PVOID)GopVirtualBase;
+    }
+    return (PVOID)(UINT_PTR)boot_info->framebuffer_base;
 }
 
 static VOID GAL_GOPPresent(
@@ -178,4 +179,10 @@ _PGAL_BACKEND GAL_GOPBackend(
 ) {
 	boot_info = Info;
 	return &GAL_GOP;
+}
+
+VOID GAL_GOPSetVirtualBase(
+	IN VIRT_ADDR_T Virt
+) {
+    GopVirtualBase = Virt;
 }

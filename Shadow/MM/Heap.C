@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/GAL/GOP.H - GAL backed for UEFI GOP framebuffer
+	* Shadow/MM/Heap.C - [Enter description]
 	* Author:   amity
-	* Date:     Mon Sep 14 12:40:49 2026
+	* Date:     Thu Sep 17 08:52:40 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,34 +20,20 @@
 */
 
 /* --- Macros ---*/
-#ifndef __GAL_GOP_H__
-#define __GAL_GOP_H__
+
 /* --- Includes ---*/
-#include <GAL/GAL.H>
-#include <info.h>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-/* 
- * Wraps whatever the bootloader already found via GOP and handedof in PhononBootInfo
- * Call once at boot, then GALSetBackend() the result
-*/
 
-_PGAL_BACKEND GAL_GOPBackend(
-	IN PPhononBootInfo Info
-);
+/* --- Main ---*/
 
-/*
-	* Once paging is up, the framebuffer lives wherever MmMapIoSpace put it.
-	* Called with the new virtual base; until then the backend keeps handing
-	* out the physical address, which is correct while identity is live.
-*/
+int main(int argc, char** argv) {
+	return 0;
+}
 
-VOID GAL_GOPSetVirtualBase(
-	IN VIRT_ADDR_T Virt
-);
+/* --- Functions ---*/
 
-#endif /* __GAL_GOP_H__ */

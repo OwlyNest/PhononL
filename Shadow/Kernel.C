@@ -7,78 +7,123 @@
  * the bootloader and Shadow is that the compiler enforces agreement on
  * layout, not that both sides have to independently get it right.
  */
-
-#include <info.h>
+/* --- Macros ---*/
+ 
+/* --- Includes ---*/
 #include <GAL/GAL.H>
 #include <GAL/GOP.H>
-#include <GFX/FB.H>
 #include <GFX/Console.H>
+#include <GFX/FB.H>
 #include <Lib/PrintK.H>
-
+#include <Lib/String.H>
+#include <MM/MM.H>
+#include <MM/Paging.H>
+#include <MM/PMM.H>
+#include <MM/VMM.H>
 #include <info.h>
-
-VOID _start(PPhononBootInfo Info) {
-	if (Info->magic != PHONON_BOOT_INFO_MAGIC) {
-		// Can't trust anything else in Info if this doesn't match — no
-		// framebuffer to draw to safely, nothing to do but halt.
+ 
+/* --- Typedefs - Structs - Enums ---*/
+ 
+/* --- Globals ---*/
+ 
+/*
+	* The pointer PhononBoot hands us aims at a local in UefiMain, sitting
+	* on firmware's stack. It survives only because nothing reclaims
+	* EfiBootServicesData yet. Copy it into .bss before trusting it with
+	* anything, so widening the reclaimable set later cannot quietly
+	* poison the boot info.
+*/
+static PhononBootInfo BootInfo;
+ 
+/* --- Prototypes ---*/
+static VOID KernelRemapFramebuffer(VOID);
+ 
+/* --- Functions ---*/
+static VOID KernelRemapFramebuffer(VOID) {
+	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch *
+					 BootInfo.framebuffer_height;
+ 
+	/*
+		* Write-combining, not uncached. The firmware hands the GOP surface
+		* over as UC, where every pixel write is a separate bus
+		* transaction -- which is why console output on real hardware
+		* crawls. WC lets the CPU batch them, and needs the PAT slot that
+		* MmInitPaging programmed.
+	*/
+	VIRT_ADDR_T FbVirt = MmMapIoSpace(MmGetKernelAddressSpace(), BootInfo.framebuffer_base, FbBytes, MM_PROT_READ | MM_PROT_WRITE | MM_PROT_WRITECOMBINE);
+ 
+	if (FbVirt == MM_VIRT_INVALID) {
+		/* No framebuffer means no output of any kind from here on. */
 		for (;;) {
-		__asm__ __volatile__("cli\n\thlt");
+			__asm__ __volatile__("cli\n\thlt");
 		}
 	}
-
-	/* ------------------------------------------------------------------ */
-	/* 1. Install the only backend we have right now (UEFI GOP)           */
-	/* ------------------------------------------------------------------ */
-	_PGAL_BACKEND GOP = GAL_GOPBackend(Info);
-	GALSetBackend(GOP);
-
-	/* ------------------------------------------------------------------ */
-    /* 2. Bring up the framebuffer abstraction (back-buffer + mode info)  */
-    /* ------------------------------------------------------------------ */
-if (fb_init() != 0) {
-        /* 
-		 * Fallback: paint solid red directly so we still prove we are
-         * in the kernel even if the higher layers failed.
-		*/
-
-        UINT32 *fb = (UINT32 *)(UINT_PTR)Info->framebuffer_base;
-        UINT32 pitch = Info->framebuffer_pitch / 4;
-        UINT32 total = pitch * Info->framebuffer_height;
-        for (UINT32 i = 0; i < total; i++) {
-            fb[i] = 0x00FF0000;
+ 
+	GAL_GOPSetVirtualBase(FbVirt);
+	fb_update_hw();
+}
+ 
+VOID KernelMain(
+	IN PPhononBootInfo Info
+) {
+	if (!Info || Info->magic != PHONON_BOOT_INFO_MAGIC) {
+		for (;;) {
+			__asm__ __volatile__("cli\n\thlt");
 		}
-
-        for (;;) {
-            __asm__ __volatile__("cli\n\thlt");
-		}
-    }
-
-	/* ------------------------------------------------------------------ */
-    /* 3. Solid red background                                            */
-    /* ------------------------------------------------------------------ */
-    fb_clear(0x00FF0000);
-
-	
-	/* ------------------------------------------------------------------ */
-    /* 4. Console + first printk                                          */
-    /* ------------------------------------------------------------------ */
-    ConsoleInit();
-	printk("Shadow kernel online\r\n");
-    printk("Backend : %s\r\n", GALBackendName());
-    printk("Mode    : %ux%u @ %u bpp\r\n", fb.Back.Width, fb.Back.Height, 32);
-    printk("Framebuf: %p\r\n", (PVOID)(UINT_PTR)Info->framebuffer_base);
-    printk("Hello from printk on the red screen!\r\n");
-
-    /* Force a present in case the last printk didn't already do it */
-    if (ConsoleIsDirty()) {
-        ConsoleRedraw();
 	}
-    fb_present();
+ 
+	MemCpy(&BootInfo, Info, sizeof(PhononBootInfo));
+ 
+	/* --- Memory --- */
+	if (MmInitPhysical(&BootInfo) != STATUS_SUCCESS) {
+		printk("[!] Physical memory init failed\n");
+		for (;;) {
+			__asm__ __volatile__("cli\n\thlt");
+		}
+	}
+ 
+	if (MmInitPaging() != STATUS_SUCCESS) {
+		printk("[!] Paging init failed\n");
+		for (;;) {
+			__asm__ __volatile__("cli\n\thlt");
+		}
+	}
+ 
+	/*
+		* Dead zone: the identity map is gone and fb.Front still points into
+		* it. No printk, no drawing, nothing that touches the framebuffer
+		* until the remap below lands.
+	*/
+	KernelRemapFramebuffer();
+	MmReclaimBootServices(&BootInfo);
+ 
+	/* Output is safe again, and now write-combining. */
+	_MM_STATS Stats;
+	MmGetPhysicalStats(&Stats);
 
-	/* ------------------------------------------------------------------ */
-    /* 5. Done – hang so the red + text stays visible                     */
-    /* ------------------------------------------------------------------ */
+
+	/* --- Output, while the identity map still makes the framebuffer
+		* reachable at its physical address.
+	*/
+	GALSetBackend(GAL_GOPBackend(&BootInfo));
+	ConsoleInit();
+	fb_init();
+ 
+	printk("Shadow\r\n");
+	printk("[x] Boot info v%u, framebuffer %ux%u\r\n",
+		   BootInfo.version,
+		   BootInfo.framebuffer_width,
+		   BootInfo.framebuffer_height);
+
+	printk("[x] Higher half live. %llu MiB free of %llu MiB\r\n",
+		   (UINT64)((Stats.FreePages * PAGE_SIZE) / (1024 * 1024)),
+		   (UINT64)((Stats.TotalPages * PAGE_SIZE) / (1024 * 1024)));
+ 
+	/* Next: the heap, on top of MmAllocateVirtual. Then fb_init can stop
+		* drawing straight to the front buffer and malloc a real one.
+	*/
+ 
 	for (;;) {
-		__asm__ __volatile__("cli\n\thlt");
+		__asm__ __volatile__("hlt");
 	}
 }

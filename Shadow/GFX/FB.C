@@ -116,9 +116,10 @@ int fb_init(void) {
   fb.Back.Pixels = NULL;
   FBBackOwned    = 0;
 
-  /* later, when a heap is available you can do:
-  *   fb.Back.Pixels = malloc(buf_size);
-  *   if (fb.Back.Pixels) { FBBackOwned = 1; … }
+  /* 
+    * later, when a heap is available we can do:
+    * b.Back.Pixels = malloc(buf_size);
+    * if (fb.Back.Pixels) { FBBackOwned = 1; … }
   */
 
   if (!fb.Back.Pixels) {

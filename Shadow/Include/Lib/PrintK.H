@@ -56,5 +56,4 @@ typedef struct {
 INT kvsnprintf(PCHAR buf, size_t size, PCCHAR fmt, va_list args);
 INT ksnprintf(PCHAR buf, size_t size, PCCHAR fmt, ...);
 VOID printk(PCCHAR fmt, ...);
-VOID c3_test_printk(VOID);
 #endif

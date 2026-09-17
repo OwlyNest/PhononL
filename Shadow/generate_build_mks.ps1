@@ -14,7 +14,9 @@ function Get-RelativePath {
 $dirs = @(
     "GFX",
     "GAL",
-    "Lib"
+    "Lib",
+    "MM",
+    "MM/Arch/X64"
 )
 
 foreach ($dir in $dirs) {

@@ -28,7 +28,7 @@
 #define CHAR_W              8
 #define CHAR_H              8
 #define CONSOLE_FG          gfx_theme_color(GFX_FG_TEXT)
-#define CONSOLE_BG          gfx_theme_color(GFX_BLUE)
+#define CONSOLE_BG          gfx_theme_color(GFX_BG_DESKTOP)
 
 #define CONSOLE_DEFAULT_TAB_WIDTH 4
 

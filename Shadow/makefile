@@ -79,7 +79,9 @@ LINKER_SCRIPT := link.ld
 SRC_DIRS := \
     GAL \
     GFX \
-    Lib
+    Lib \
+    MM \
+    MM/Arch/X64 \
 
 # --------------------------------------------------------------------
 # Compiler flags
@@ -89,6 +91,7 @@ COMMON_FLAGS := \
     -m64 \
     -mno-red-zone \
     -mgeneral-regs-only \
+    -mcmodel=kernel \
     -ffreestanding \
     -fno-stack-protector \
     -fno-asynchronous-unwind-tables \
@@ -100,7 +103,6 @@ COMMON_FLAGS := \
     -MP \
     -D__OWLYNEST__ \
     -IInclude \
-    -include Include/Internal/Types.H \
     -I../PhononPkg/Boot
 
 # NOTE: no -mcmodel=kernel yet. That model assumes every symbol lives in
