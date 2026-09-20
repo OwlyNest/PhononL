@@ -1,5 +1,5 @@
 /*
-	* Shadow/Include/MM/Paging.H - [Enter description]
+	* Shadow/Include/Arch/X64/Paging.H - [Enter description]
 	* Author:   amity
 	* Date:     Wed Sep 16 14:29:12 2026
 	* Copyright © 2026 OwlyNest
@@ -20,8 +20,8 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_PAGING_H__
-#define __MM_PAGING_H__
+#ifndef __ARCH_X64_PAGING_H__
+#define __ARCH_X64_PAGING_H__
 
 /* --- Includes ---*/
 #include <MM/MM.H>
@@ -91,4 +91,4 @@ VOID MmInvalidatePage(IN VIRT_ADDR_T Virt);
 VOID MmFlushTlb(VOID);
 
 
-#endif /* __MM_PAGING_H__ */
+#endif /* __ARCH_X64_PAGING_H__ */

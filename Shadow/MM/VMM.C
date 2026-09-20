@@ -27,12 +27,14 @@
 	* whatever was mapped next.
 */
 
+#include "Internal/Types.H"
 #define VMM_GUARD_PAGES 1
 
 /* --- Includes ---*/
 #include <MM/MM.H>
-#include <MM/Paging.H>
+#include <Arch/X64/Paging.H>
 #include <MM/PMM.H>
+#include <XAL/XScope.H>
 #include <MM/VMM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
@@ -150,8 +152,8 @@ VIRT_ADDR_T MmMapIoSpace(
 		* choice for a framebuffer and the wrong one for control registers.
 	*/
 
-	if (!(Prot & MM_PROT_WRITECOMBINE)) {
-		Prot |= MM_PROT_NOCACHE;
+	if (!(Prot & (_MM_PROTECTION)MM_PROT_WRITECOMBINE)) {
+		Prot |= (_MM_PROTECTION)MM_PROT_NOCACHE;
 	}
  
 	VIRT_ADDR_T Virt = VmmBumpMmio(Space, Pages);
@@ -159,7 +161,7 @@ VIRT_ADDR_T MmMapIoSpace(
 		return MM_VIRT_INVALID;
 	}
  
-	if (MmMapRange(Space, Virt, Aligned, Pages * PAGE_SIZE, Prot | MM_PROT_GLOBAL) != STATUS_SUCCESS) {
+	if (MmMapRange(Space, Virt, Aligned, Pages * PAGE_SIZE, (_MM_PROTECTION)(Prot | MM_PROT_GLOBAL)) != STATUS_SUCCESS) {
 		return MM_VIRT_INVALID;
 	}
  
@@ -223,7 +225,7 @@ VIRT_ADDR_T MmAllocateVirtual(
 			return MM_VIRT_INVALID;
 		}
  
-		if (MmMapPage(Space, Virt + (i * PAGE_SIZE), Phys, Prot | MM_PROT_GLOBAL) != STATUS_SUCCESS) {
+		if (MmMapPage(Space, Virt + (i * PAGE_SIZE), Phys, (_MM_PROTECTION)(Prot | MM_PROT_GLOBAL)) != STATUS_SUCCESS) {
 			MmFreePage(Phys);
 			return MM_VIRT_INVALID;
 		}
@@ -250,4 +252,9 @@ VOID MmFreeVirtual(
 		}
 	}
 }
+
+SHSTATUS MmVmmXScopeInit(VOID) {
+	return STATUS_SUCCESS;	
+}
  
+XSCOPENODE(MM_VMM, MmVmmXScopeInit, "MM_Paging");

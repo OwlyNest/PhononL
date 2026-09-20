@@ -44,6 +44,12 @@ SECTIONS
         __RodataEnd = .;
     } : text
 
+        .xscope_nodes ALIGN(8) : AT(ADDR(.xscope_nodes) - KERNEL_VMA) {
+        __XScopeNodesStart = .;
+        KEEP(*(.xscope_nodes))
+        __XScopeNodesEnd = .;
+    }
+
     .data ALIGN(4K) : AT(ADDR(.data) - KERNEL_VMA) {
         __DataStart = .;
         *(.data*)

@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/Heap.H - Kernel pool allocator
+	* Shadow/Include/IAL/IAL.H - Interrupt Abstraction Layer
 	* Author:   amity
-	* Date:     Thu Sep 17 08:52:50 2026
+	* Date:     Sat Sep 19 00:06:01 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,11 +20,28 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_HEAP_H__
-#define __MM_HEAP_H__
+#ifndef __IAL_IAL_H__
+#define __IAL_IAL_H__
+/*
+	* Old MacDonald had a farm, ✨IAL IAL H✨
+*/
+
+typedef struct IAL_BACKEND _IAL_BACKEND, *_PIAL_BACKEND;
+
+#define XAL_PREFIX  IAL
+#define XAL_BACKEND _PIAL_BACKEND
+
+struct IAL_BACKEND {
+	PCCHAR Name;
+	#define XAL_EMIT_STRUCT
+	#include <XAL/xMCAL.H>
+	#include <IAL/IAL.xal>
+	#undef XAL_EMIT_STRUCT
+	#undef XAL_METHOD
+	#undef XAL_METHOD_VOID
+};
 
 /* --- Includes ---*/
-#include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -32,16 +49,14 @@
 
 /* --- Prototypes ---*/
 
-/*
-	* Requires MmInitPaging() to have already switched CR3 -- this grows
-	* through MmAllocateVirtual, which needs a live kernel address space.
-*/
-SHSTATUS ExInitializePool(VOID);
+#define XAL_EMIT_PROTOTYPES
+#include <XAL/xMCAL.H>
+#include <IAL/IAL.xal>
+#undef XAL_EMIT_PROTOTYPES
+#undef XAL_METHOD
+#undef XAL_METHOD_VOID
  
-PVOID ExAllocatePool(IN SIZE_T Bytes);
-PVOID ExAllocatePoolZeroed(IN SIZE_T Bytes);
-VOID  ExFreePool(IN PVOID Ptr);
-BOOLEAN ExPoolReady(VOID);
+#undef XAL_PREFIX
+#undef XAL_BACKEND
 
-
-#endif /* __MM_HEAP_H__ */
+#endif /* __IAL_IAL_H__ */

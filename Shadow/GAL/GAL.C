@@ -23,7 +23,6 @@
 
 /* --- Includes ---*/
 #include <GAL/GAL.H>
-#include <Lib/PrintK.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -33,50 +32,13 @@ static _GAL_BACKEND *ActiveBackend = NULL;
 /* --- Prototypes ---*/
 
 /* --- Functions ---*/
-/* ==========================================================================
- * Registration
- * ======================================================================= */
-VOID GALSetBackend(
-	IN _PGAL_BACKEND Backend
-) {
-	ActiveBackend = Backend;
-}
-
-PCCHAR GALBackendName(VOID) {
-	return ActiveBackend ? ActiveBackend->Name : "None";
-}
-
-/* ==========================================================================
- * Dispatch
- * ======================================================================= */
-INT GALInit(void) {
-  	if (!ActiveBackend) {
-    	return -1;
-	}
-	return ActiveBackend->Init(ActiveBackend);
-}
-
-VOID GALGetMode(
-	OUT _PGAL_MODE OutMode
-) {
-	if (!ActiveBackend) {
-		return;
-	}
-	ActiveBackend->GetMode(ActiveBackend, OutMode);
-}
-
-PVOID GALGetFramebuffer(VOID) {
-	if (!ActiveBackend) {
-		return NULL;
-	}
-
-	return ActiveBackend->GetFramebuffer(ActiveBackend);
-}
-
-VOID GALPresent(const _PGFX_SURFACE Back) {
-	if (!ActiveBackend) {
-		return;
-	}
-
-	ActiveBackend->Present(ActiveBackend, Back);
-}
+#define XAL_PREFIX GAL
+#define XAL_BACKEND _PGAL_BACKEND
+#define XAL_EMIT_DISPATCH
+#include <XAL/xMCAL.H>
+#include <GAL/GAL.xal>
+#undef XAL_EMIT_DISPATCH
+#undef XAL_METHOD
+#undef XAL_METHOD_VOID
+#undef XAL_PREFIX
+#undef XAL_BACKEND

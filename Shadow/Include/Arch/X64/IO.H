@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/Heap.H - Kernel pool allocator
+	* Shadow/Include/Arch/X64/IO.H - Port I/O primitives
 	* Author:   amity
-	* Date:     Thu Sep 17 08:52:50 2026
+	* Date:     Thu Sep 17 23:26:55 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,28 +20,42 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_HEAP_H__
-#define __MM_HEAP_H__
+#ifndef __ARCH_X64_IO_H__
+#define __ARCH_X64_IO_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+FORCEINLINE VOID OutByte(
+	IN UINT16 Port,
+	IN UINT8 Value
+) {
+	__asm__ __volatile__("outb %0, %1":: "a"(Value), "Nd"(Port));
+}
 
-/*
-	* Requires MmInitPaging() to have already switched CR3 -- this grows
-	* through MmAllocateVirtual, which needs a live kernel address space.
-*/
-SHSTATUS ExInitializePool(VOID);
- 
-PVOID ExAllocatePool(IN SIZE_T Bytes);
-PVOID ExAllocatePoolZeroed(IN SIZE_T Bytes);
-VOID  ExFreePool(IN PVOID Ptr);
-BOOLEAN ExPoolReady(VOID);
+FORCEINLINE UINT8 InByte(
+	IN UINT16 Port
+) {
+	UINT8 Value;
+	__asm__ __volatile__("inb %1, %0" : "=a"(Value) : "Nd"(Port));
+
+	return Value;
+}
+
+FORCEINLINE VOID IOWait(VOID) {
+	/*
+		* Port 0x80 is POST-code diagnostic space on real hardware 
+		* unused by anything that matters, so writing to it is the traditional
+		* "burn a bus cycle" trick for giving the (comparatively glacial)
+		* 8259 time to actually latch a write before the next one lands.
+	*/
+
+	OutByte(0x80, 0);
+}
 
 
-#endif /* __MM_HEAP_H__ */
+#endif /* __ARCH_X64_IO_H__ */

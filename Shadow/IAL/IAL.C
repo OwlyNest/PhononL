@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/Heap.H - Kernel pool allocator
+	* Shadow/IAL/IAL.C - Interrupt Abstraction Layer: dispatch
 	* Author:   amity
-	* Date:     Thu Sep 17 08:52:50 2026
+	* Date:     Sat Sep 19 00:06:20 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,28 +20,26 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_HEAP_H__
-#define __MM_HEAP_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
+#include <IAL/IAL.H>
 
 /* --- Typedefs - Structs - Enums ---*/
+static _PIAL_BACKEND ActiveBackend = NULL;
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
 
-/*
-	* Requires MmInitPaging() to have already switched CR3 -- this grows
-	* through MmAllocateVirtual, which needs a live kernel address space.
-*/
-SHSTATUS ExInitializePool(VOID);
- 
-PVOID ExAllocatePool(IN SIZE_T Bytes);
-PVOID ExAllocatePoolZeroed(IN SIZE_T Bytes);
-VOID  ExFreePool(IN PVOID Ptr);
-BOOLEAN ExPoolReady(VOID);
+/* --- Functions ---*/
 
-
-#endif /* __MM_HEAP_H__ */
+#define XAL_PREFIX IAL
+#define XAL_BACKEND _PIAL_BACKEND
+#define XAL_EMIT_DISPATCH
+#include <XAL/xMCAL.H>
+#include <IAL/IAL.xal>
+#undef XAL_EMIT_DISPATCH
+#undef XAL_METHOD
+#undef XAL_METHOD_VOID
+#undef XAL_PREFIX
+#undef XAL_BACKEND

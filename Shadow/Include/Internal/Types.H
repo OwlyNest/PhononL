@@ -33,6 +33,8 @@
 #error "Unsupported architecture"
 #endif
 
+#define CONST const
+
 /* --- Includes ---*/
 #include <stddef.h>
 #include <stdint.h>

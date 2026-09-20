@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/Heap.H - Kernel pool allocator
+	* Shadow/Include/IAL/PIC.H - IAL backend for the 8259 PIC
 	* Author:   amity
-	* Date:     Thu Sep 17 08:52:50 2026
+	* Date:     Sat Sep 19 00:06:05 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,28 +20,17 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_HEAP_H__
-#define __MM_HEAP_H__
+#ifndef __IAL_PIC_H__
+#define __IAL_PIC_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
+#include <IAL/IAL.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+_PIAL_BACKEND IALPicBackend(VOID);
 
-/*
-	* Requires MmInitPaging() to have already switched CR3 -- this grows
-	* through MmAllocateVirtual, which needs a live kernel address space.
-*/
-SHSTATUS ExInitializePool(VOID);
- 
-PVOID ExAllocatePool(IN SIZE_T Bytes);
-PVOID ExAllocatePoolZeroed(IN SIZE_T Bytes);
-VOID  ExFreePool(IN PVOID Ptr);
-BOOLEAN ExPoolReady(VOID);
-
-
-#endif /* __MM_HEAP_H__ */
+#endif /* __IAL_PIC_H__ */

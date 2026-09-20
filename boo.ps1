@@ -24,8 +24,7 @@ for ($i = 0; $i -lt $args.Length; $i++) {
         "--partial"    { $Full = $false }
         "-p"           { $Full = $false }
 
-        # Takes the next argument as the target block device, e.g.
-        # ./boo.ps1 --usb /dev/sdb
+
         "--usb"        { $i++; $UsbDevice = $args[$i] }
     }
 }

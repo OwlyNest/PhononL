@@ -1,4 +1,4 @@
-#include "Internal/Types.H"
+#include <MM/Heap.H>
 #include <Lib/String.H>
 
 INT StrCmp(PCCHAR S1, PCCHAR S2) {
@@ -92,15 +92,15 @@ PCHAR StrChr(PCCHAR Str, INT C) {
     return NULL;
 }
 
-// PCHAR StrDup(PCCHAR Str) {
-//     SIZE_T Len = StrLen(Str);
-//     PCHAR Copy = (PCHAR)malloc(Len + 1);
-//     if (Copy) {
-//         MemCpy(Copy, Str, Len);
-//         Copy[Len] = '\0';
-//     }
-//     return Copy;
-// }
+PCHAR StrDup(PCCHAR Str) {
+    SIZE_T Len = StrLen(Str);
+    PCHAR Copy = (PCHAR)ExAllocatePool(Len + 1);
+    if (Copy) {
+        MemCpy(Copy, Str, Len);
+        Copy[Len] = '\0';
+    }
+    return Copy;
+}
 
 SIZE_T StrLen(PCCHAR Str) {
     SIZE_T Len = 0;
@@ -154,31 +154,29 @@ PCHAR StrChrNul(PCCHAR S, INT C) {
     return (PCHAR)S;
 }
 
-// Note: StrRChr is implemented but not declared in the current header.
-// Uncomment / add to header if needed.
-// PCHAR StrRChr(PCCHAR S, INT C) {
-//     PCCHAR Last = NULL;
-//     while (*S) {
-//         if (*S == (CHAR)C) {
-//             Last = S;
-//         }
-//         S++;
-//     }
-//     return (PCHAR)Last;
-// }
+PCHAR StrRChr(PCCHAR S, INT C) {
+    PCCHAR Last = NULL;
+    while (*S) {
+        if (*S == (CHAR)C) {
+            Last = S;
+        }
+        S++;
+    }
+    return (PCHAR)Last;
+}
 
-// PCHAR StrnDup(PCCHAR S, SIZE_T N) {
-//     SIZE_T Len = StrnLen(S, N);
-//     PCHAR Copy = (PCHAR)malloc(Len + 1);
-//     if (!Copy) {
-//         return NULL;
-//     }
-//     for (SIZE_T I = 0; I < Len; I++) {
-//         Copy[I] = S[I];
-//     }
-//     Copy[Len] = '\0';
-//     return Copy;
-// }
+PCHAR StrnDup(PCCHAR S, SIZE_T N) {
+    SIZE_T Len = StrnLen(S, N);
+    PCHAR Copy = (PCHAR)ExAllocatePool(Len + 1);
+    if (!Copy) {
+        return NULL;
+    }
+    for (SIZE_T I = 0; I < Len; I++) {
+        Copy[I] = S[I];
+    }
+    Copy[Len] = '\0';
+    return Copy;
+}
 
 PVOID MemSet(PVOID Dest, INT Val, SIZE_T Len) {
     PUCHAR Ptr = (PUCHAR)Dest;

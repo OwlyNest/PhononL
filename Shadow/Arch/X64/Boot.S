@@ -1,4 +1,4 @@
-# Shadow/MM/Arch/X64/Boot.S - low entry stub: initial page tables
+# Shadow/Arch/X64/Boot.S - low entry stub: initial page tables
 # Author:   amity
 # Date:     Wed Sep 16 14:23:53 2026
 # Copyright © 2026 OwlyNest

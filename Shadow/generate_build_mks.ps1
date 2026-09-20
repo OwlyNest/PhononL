@@ -12,11 +12,13 @@ function Get-RelativePath {
 }
 
 $dirs = @(
+    "XAL",
     "GFX",
     "GAL",
+    "IAL",
     "Lib",
     "MM",
-    "MM/Arch/X64"
+    "Arch\X64"
 )
 
 foreach ($dir in $dirs) {

@@ -82,7 +82,7 @@
 	* caller asking for a writable page should not have to know which bit
 	* that is on this particular CPU.
 */
-typedef enum {
+typedef enum MM_PROTECTION {
 	MM_PROT_NONE    = 0x0000,
 	MM_PROT_READ    = 0x0001,
 	MM_PROT_WRITE   = 0x0002,
@@ -128,6 +128,8 @@ extern UINT8 __TextStart[];
 extern UINT8 __TextEnd[];
 extern UINT8 __RodataStart[];
 extern UINT8 __RodataEnd[];
+extern UINT8 __XScopeNodesStart[];
+extern UINT8 __XScopeNodesEnd[];
 extern UINT8 __DataStart[];
 extern UINT8 __DataEnd[];
 extern UINT8 __BssStart[];

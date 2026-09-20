@@ -44,6 +44,7 @@
 #include <MM/MM.H>
 #include <MM/PMM.H>
 #include <info.h>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -500,3 +501,11 @@ VOID MmReclaimBootServices(IN PPhononBootInfo Info) {
         }
     }
 }
+
+extern PhononBootInfo BootInfo;
+
+static SHSTATUS MmPmmXScopeInit(VOID) {
+	return MmInitPhysical(&BootInfo);
+}
+
+XSCOPENODE(MM_PMM, MmPmmXScopeInit);

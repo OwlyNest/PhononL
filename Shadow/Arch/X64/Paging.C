@@ -1,5 +1,5 @@
 /*
-	* Shadow/MM/Arch/X64/Paging.C - x86_64 4-level page tables
+	* Shadow/Arch/X64/Paging.C - x86_64 4-level page tables
 	* Author:   amity
 	* Date:     Wed Sep 16 14:28:58 2026
 	* Copyright © 2026 OwlyNest
@@ -20,7 +20,6 @@
 */
 
 /* --- Macros ---*/
-#include "Internal/Types.H"
 #define PTE_PRESENT     (1ULL << 0)
 #define PTE_WRITABLE    (1ULL << 1)
 #define PTE_USER        (1ULL << 2)
@@ -58,8 +57,9 @@
 /* --- Includes ---*/
 #include <Lib/String.H>
 #include <MM/MM.H>
-#include <MM/Paging.H>
+#include <Arch/X64/Paging.H>
 #include <MM/PMM.H>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -347,7 +347,7 @@ static VOID PagingMapKernelSection(
 	for (VIRT_ADDR_T Virt = First; Virt < Last; Virt += PAGE_SIZE) {
 		PHYS_ADDR_T Phys = MmKernelVirtToPhys((PVOID)Virt);
  
-		if (MmMapPage(&KernelSpace, Virt, Phys, Prot | MM_PROT_GLOBAL) != STATUS_SUCCESS) {
+		if (MmMapPage(&KernelSpace, Virt, Phys, (_MM_PROTECTION)(Prot | MM_PROT_GLOBAL)) != STATUS_SUCCESS) {
 			return;
 		}
 	}
@@ -396,9 +396,7 @@ SHSTATUS MmInitPaging(VOID) {
 	for (PHYS_ADDR_T Phys = 0; Phys < DirectLimit; Phys += HUGE_1G_SIZE) {
 		VIRT_ADDR_T Virt = MM_DIRECT_MAP_BASE + Phys;
  
-		if (MmMapHugePage(&KernelSpace, Virt, Phys,
-						  MM_PROT_READ | MM_PROT_WRITE |
-						  MM_PROT_GLOBAL) != STATUS_SUCCESS) {
+		if (MmMapHugePage(&KernelSpace, Virt, Phys, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE | MM_PROT_GLOBAL)) != STATUS_SUCCESS) {
 			return (SHSTATUS)-1;
 		}
 	}
@@ -409,10 +407,11 @@ SHSTATUS MmInitPaging(VOID) {
 		* enforced even at CPL0 -- a stray write to .rodata faults instead
 		* of quietly succeeding.
 	*/
-	PagingMapKernelSection(__TextStart, __TextEnd, MM_PROT_READ | MM_PROT_EXECUTE, "text");
-	PagingMapKernelSection(__RodataStart, __RodataEnd, MM_PROT_READ, "rodata");
-	PagingMapKernelSection(__DataStart, __DataEnd, MM_PROT_READ | MM_PROT_WRITE, "data");
-	PagingMapKernelSection(__BssStart, __BssEnd, MM_PROT_READ | MM_PROT_WRITE, "bss");
+	PagingMapKernelSection(__TextStart, __TextEnd, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_EXECUTE), "text");
+	PagingMapKernelSection(__RodataStart, __RodataEnd, (_MM_PROTECTION)(MM_PROT_READ), "rodata");
+	PagingMapKernelSection(__DataStart, __DataEnd, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE), "data");
+	PagingMapKernelSection(__BssStart, __BssEnd, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE), "bss");
+	PagingMapKernelSection(__XScopeNodesStart, __XScopeNodesEnd, (_MM_PROTECTION)MM_PROT_READ, "xscope");
  
 	/*
 		* Note what is deliberately absent: any identity mapping. The boot
@@ -426,3 +425,5 @@ SHSTATUS MmInitPaging(VOID) {
  
 	return STATUS_SUCCESS;
 }
+
+XSCOPENODE(MM_Paging, MmInitPaging, "MM_PMM");

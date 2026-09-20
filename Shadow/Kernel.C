@@ -16,11 +16,16 @@
 #include <GFX/FB.H>
 #include <Lib/PrintK.H>
 #include <Lib/String.H>
+#include <XAL/XScope.H>
 #include <MM/MM.H>
-#include <MM/Paging.H>
+#include <Arch/X64/Paging.H>
 #include <MM/PMM.H>
 #include <MM/VMM.H>
+#include <MM/Heap.H>
 #include <info.h>
+#include <Arch/X64/IDT.H>
+#include <IAL/IAL.H>
+#include <IAL/PIC.H>
  
 /* --- Typedefs - Structs - Enums ---*/
  
@@ -33,15 +38,14 @@
 	* anything, so widening the reclaimable set later cannot quietly
 	* poison the boot info.
 */
-static PhononBootInfo BootInfo;
+PhononBootInfo BootInfo;
  
 /* --- Prototypes ---*/
 static VOID KernelRemapFramebuffer(VOID);
  
 /* --- Functions ---*/
 static VOID KernelRemapFramebuffer(VOID) {
-	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch *
-					 BootInfo.framebuffer_height;
+	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch * BootInfo.framebuffer_height;
  
 	/*
 		* Write-combining, not uncached. The firmware hands the GOP surface
@@ -50,7 +54,8 @@ static VOID KernelRemapFramebuffer(VOID) {
 		* crawls. WC lets the CPU batch them, and needs the PAT slot that
 		* MmInitPaging programmed.
 	*/
-	VIRT_ADDR_T FbVirt = MmMapIoSpace(MmGetKernelAddressSpace(), BootInfo.framebuffer_base, FbBytes, MM_PROT_READ | MM_PROT_WRITE | MM_PROT_WRITECOMBINE);
+
+	VIRT_ADDR_T FbVirt = MmMapIoSpace(MmGetKernelAddressSpace(), BootInfo.framebuffer_base, FbBytes, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE | MM_PROT_WRITECOMBINE));
  
 	if (FbVirt == MM_VIRT_INVALID) {
 		/* No framebuffer means no output of any kind from here on. */
@@ -73,21 +78,8 @@ VOID KernelMain(
 	}
  
 	MemCpy(&BootInfo, Info, sizeof(PhononBootInfo));
- 
-	/* --- Memory --- */
-	if (MmInitPhysical(&BootInfo) != STATUS_SUCCESS) {
-		printk("[!] Physical memory init failed\n");
-		for (;;) {
-			__asm__ __volatile__("cli\n\thlt");
-		}
-	}
- 
-	if (MmInitPaging() != STATUS_SUCCESS) {
-		printk("[!] Paging init failed\n");
-		for (;;) {
-			__asm__ __volatile__("cli\n\thlt");
-		}
-	}
+
+	XScopeRun();
  
 	/*
 		* Dead zone: the identity map is gone and fb.Front still points into
@@ -96,7 +88,7 @@ VOID KernelMain(
 	*/
 	KernelRemapFramebuffer();
 	MmReclaimBootServices(&BootInfo);
- 
+	
 	/* Output is safe again, and now write-combining. */
 	_MM_STATS Stats;
 	MmGetPhysicalStats(&Stats);
@@ -118,11 +110,23 @@ VOID KernelMain(
 	printk("[x] Higher half live. %llu MiB free of %llu MiB\r\n",
 		   (UINT64)((Stats.FreePages * PAGE_SIZE) / (1024 * 1024)),
 		   (UINT64)((Stats.TotalPages * PAGE_SIZE) / (1024 * 1024)));
+
  
-	/* Next: the heap, on top of MmAllocateVirtual. Then fb_init can stop
-		* drawing straight to the front buffer and malloc a real one.
-	*/
- 
+	if (ExPoolReady()) {
+		printk("[x] Heap Heap Hooray!\r\n");
+	}
+
+	IdtInit();
+
+	IALSetBackend(IALPicBackend());
+	if (IALInit() != 0) {
+        printk("[!] IAL backend '%a' failed to initialize\n", IALBackendName());
+        for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+    }
+    printk("[Ial] Backend: %a\n", IALBackendName());
+
+    __asm__ __volatile__("sti");
+
 	for (;;) {
 		__asm__ __volatile__("hlt");
 	}

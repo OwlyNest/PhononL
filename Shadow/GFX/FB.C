@@ -27,7 +27,7 @@
 #include <Lib/Math.H>
 #include <GFX/Font.H>
 #include <Lib/String.H>
-// #include <mm/heap.h>
+#include <MM/Heap.H>
 // #include <screen/printk.h>
 
 /*
@@ -62,7 +62,7 @@ static struct {
   UINT32 RedMask;
   UINT32 GreenMask;
   UINT32 BlueMask;
-} fb_hw;
+} FbHw;
 
 /* --- Prototypes ---*/
 
@@ -91,13 +91,13 @@ int fb_init(void) {
   _GAL_MODE Mode;
   GALGetMode(&Mode);
  
-  fb_hw.Width      = Mode.Width;
-  fb_hw.Height     = Mode.Height;
-  fb_hw.Pitch      = Mode.Pitch;
-  fb_hw.Bpp        = Mode.Bpp;
-  fb_hw.RedMask   = Mode.RedMask;
-  fb_hw.GreenMask = Mode.GreenMask;
-  fb_hw.BlueMask  = Mode.BlueMask;
+  FbHw.Width      = Mode.Width;
+  FbHw.Height     = Mode.Height;
+  FbHw.Pitch      = Mode.Pitch;
+  FbHw.Bpp        = Mode.Bpp;
+  FbHw.RedMask   = Mode.RedMask;
+  FbHw.GreenMask = Mode.GreenMask;
+  FbHw.BlueMask  = Mode.BlueMask;
  
   fb.Front = (UINT32 *)GALGetFramebuffer();
   if (!fb.Front) {
@@ -106,34 +106,34 @@ int fb_init(void) {
   }
  
   /* --- Backbuffer --- */
-  fb.Back.Width = fb_hw.Width;
-  fb.Back.Height = fb_hw.Height;
+  fb.Back.Width = FbHw.Width;
+  fb.Back.Height = FbHw.Height;
  
 /* remove the giant static array completely */
 
-  // SIZE_T buf_size = (SIZE_T)fb.Back.Width * fb.Back.Height * sizeof(UINT32);
+    SIZE_T BufSize = (SIZE_T)fb.Back.Width * fb.Back.Height * sizeof(UINT32);
 
-  fb.Back.Pixels = NULL;
-  FBBackOwned    = 0;
+    fb.Back.Pixels = NULL;
+    FBBackOwned    = 0;
 
-  /* 
-    * later, when a heap is available we can do:
-    * b.Back.Pixels = malloc(buf_size);
-    * if (fb.Back.Pixels) { FBBackOwned = 1; … }
-  */
+    fb.Back.Pixels = ExPoolReady() ? (UINT32 *)ExAllocatePool(BufSize) : NULL;
 
-  if (!fb.Back.Pixels) {
-      /* early-boot / no-heap path – draw straight to the GOP front buffer */
-      fb.Back.Pixels  = fb.Front;
-      fb.Back.Pitch   = fb_hw.Pitch;
-      fb.Back.PitchPx = fb_hw.Pitch / (fb_hw.Bpp / 8);
-  }
+    if (fb.Back.Pixels) {
+        fb.Back.Pitch   = fb.Back.Width * sizeof(UINT32);
+        fb.Back.PitchPx = fb.Back.Width;
+        FBBackOwned     = 1;
+        MemSet(fb.Back.Pixels, 0, BufSize);
+    } else {
+        fb.Back.Pixels  = fb.Front;
+        fb.Back.Pitch   = FbHw.Pitch;
+        fb.Back.PitchPx = FbHw.Pitch / (FbHw.Bpp / 8);
+    }
 
   fb.Back.Pitch   = fb.Back.Width * sizeof(UINT32);
   fb.Back.PitchPx = fb.Back.Width;
  
   fb.Initialized = 1;
-  // printk("[fb] Using GAL backend '%s': %ux%u\n", gal_backend_name(), fb_hw.Width, fb_hw.Height);
+  // printk("[fb] Using GAL backend '%s': %ux%u\n", gal_backend_name(), FbHw.Width, FbHw.Height);
   return 0;
 }
 
@@ -141,13 +141,13 @@ VOID fb_update_hw(VOID) {
   _GAL_MODE Mode;
   GALGetMode(&Mode);
  
-  fb_hw.Width      = Mode.Width;
-  fb_hw.Height     = Mode.Height;
-  fb_hw.Pitch      = Mode.Pitch;
-  fb_hw.Bpp        = Mode.Bpp;
-  fb_hw.RedMask    = Mode.RedMask;
-  fb_hw.GreenMask  = Mode.GreenMask;
-  fb_hw.BlueMask   = Mode.BlueMask;
+  FbHw.Width      = Mode.Width;
+  FbHw.Height     = Mode.Height;
+  FbHw.Pitch      = Mode.Pitch;
+  FbHw.Bpp        = Mode.Bpp;
+  FbHw.RedMask    = Mode.RedMask;
+  FbHw.GreenMask  = Mode.GreenMask;
+  FbHw.BlueMask   = Mode.BlueMask;
  
   fb.Front = (UINT32 *)GALGetFramebuffer();
 }
@@ -159,12 +159,12 @@ VOID fb_present(VOID) {
   if (!fb.Initialized)
     return;
  
-  if (fb_hw.Bpp == 32 && fb.Back.Pitch == fb_hw.Pitch) {
+  if (FbHw.Bpp == 32 && fb.Back.Pitch == FbHw.Pitch) {
     MemCpy(fb.Front, fb.Back.Pixels, fb.Back.Pitch * fb.Back.Height);
   } else {
     for (uint32_t y = 0; y < fb.Back.Height; y++) {
       uint32_t *src_row = fb.Back.Pixels + y * fb.Back.PitchPx;
-      uint8_t *dst_row = (uint8_t *)fb.Front + y * fb_hw.Pitch;
+      uint8_t *dst_row = (uint8_t *)fb.Front + y * FbHw.Pitch;
  
       for (uint32_t x = 0; x < fb.Back.Width; x++) {
         uint32_t color = src_row[x];
@@ -172,11 +172,11 @@ VOID fb_present(VOID) {
         uint8_t g = (color >> 8) & 0xFF;
         uint8_t b = color & 0xFF;
  
-        if (fb_hw.Bpp == 24) {
+        if (FbHw.Bpp == 24) {
           dst_row[x * 3 + 0] = b;
           dst_row[x * 3 + 1] = g;
           dst_row[x * 3 + 2] = r;
-        } else if (fb_hw.Bpp == 16) {
+        } else if (FbHw.Bpp == 16) {
           uint16_t *dst16 = (uint16_t *)dst_row;
           dst16[x] = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
         }
@@ -196,24 +196,24 @@ VOID fb_present(VOID) {
 
 
 UINT32 fb_pack_pixel(UINT8 r, UINT8 g, UINT8 b) {
-  if (fb_hw.Bpp == 32) {
-    if (fb_hw.RedMask == 0x00FF0000) {
+  if (FbHw.Bpp == 32) {
+    if (FbHw.RedMask == 0x00FF0000) {
       return ((UINT32)r << 16) | ((UINT32)g << 8) | b;
-    } else if (fb_hw.RedMask == 0x000000FF) {
+    } else if (FbHw.RedMask == 0x000000FF) {
       return ((UINT32)b << 16) | ((UINT32)g << 8) | r;
     }
     return ((UINT32)r << 16) | ((UINT32)g << 8) | b;
   }
-  if (fb_hw.Bpp == 24) {
+  if (FbHw.Bpp == 24) {
     return ((UINT32)r << 16) | ((UINT32)g << 8) | b;
   }
-  if (fb_hw.Bpp == 16) {
+  if (FbHw.Bpp == 16) {
     UINT32 r5 = (r >> 3) & 0x1F;
     UINT32 g6 = (g >> 2) & 0x3F;
     UINT32 b5 = (b >> 3) & 0x1F;
     return (r5 << 11) | (g6 << 5) | b5;
   }
-  if (fb_hw.Bpp == 15) {
+  if (FbHw.Bpp == 15) {
     UINT32 r5 = (r >> 3) & 0x1F;
     UINT32 g5 = (g >> 3) & 0x1F;
     UINT32 b5 = (b >> 3) & 0x1F;

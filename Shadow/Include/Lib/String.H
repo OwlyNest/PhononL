@@ -18,6 +18,7 @@ PCHAR  StrnCpy(PCHAR Dest, PCCHAR Src, SIZE_T N);
 SIZE_T StrnLen(PCCHAR s, SIZE_T maxLen);
 PCHAR  StrChrNul(PCCHAR s, INT C);
 PCHAR  StrChr(PCCHAR s, INT C);
+PCHAR  StrRChr(PCCHAR S, INT C);
 PCHAR  StrnDup(PCCHAR s, SIZE_T N);
 
 PVOID MemSet(PVOID Dest, INT val, SIZE_T Len);

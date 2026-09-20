@@ -1,0 +1,37 @@
+/*
+	* Shadow/GAL/GAL.xal - GAL manifest
+	*
+	* Two readers, same file:
+	*   - The C preprocessor, via Include/Xal/XMcal.H, turns the
+	*     XAL_METHOD* lines into the backend struct and dispatch
+	*     functions. XAL_META expands to nothing here -- GCC never sees it.
+	*   - The build-time generator reads XAL_META lines as plain text; it
+	*     never invokes a preprocessor on this file and never looks at
+	*     the XAL_METHOD* lines at all.
+	* Each side only has to understand its own kind of line.
+*/
+
+XAL_META(Class,   xMCAL)
+XAL_META(Depends, MM_VMM)
+
+XAL_METHOD(INT, Init,
+    (_PGAL_BACKEND Self),          /* StructArgs  */
+    (VOID),                        /* PublicArgs  */
+    (ActiveBackend),               /* CallArgs    */
+    -1)
+
+XAL_METHOD(PVOID, GetFramebuffer,
+    (_PGAL_BACKEND Self),
+    (VOID),
+    (ActiveBackend),
+    NULL)
+
+XAL_METHOD_VOID(GetMode,
+    (_PGAL_BACKEND Self, OUT _PGAL_MODE OutMode),
+    (OUT _PGAL_MODE OutMode),
+    (ActiveBackend, OutMode))
+
+XAL_METHOD_VOID(Present,
+    (_PGAL_BACKEND Self, IN const _PGFX_SURFACE Back),
+    (IN const _PGFX_SURFACE Back),
+    (ActiveBackend, Back))

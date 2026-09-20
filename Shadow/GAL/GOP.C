@@ -172,8 +172,8 @@ static _GAL_BACKEND GAL_GOP = {
 
 _PGAL_BACKEND GAL_GOPBackend(
 	/*
-	 * Oh sorry, you don't like P-notation?
-	 * Too bad, I love it 🦄
+		* Oh sorry, you don't like P-notation?
+		* Too bad, I love it 🦄
 	*/
 	PPhononBootInfo Info
 ) {
