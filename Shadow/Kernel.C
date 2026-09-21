@@ -10,20 +10,14 @@
 /* --- Macros ---*/
  
 /* --- Includes ---*/
+#include <GFX/GFX.H>
 #include <GAL/GAL.H>
 #include <GAL/GOP.H>
-#include <GFX/Console.H>
-#include <GFX/FB.H>
-#include <Lib/PrintK.H>
-#include <Lib/String.H>
+#include <Lib/Lib.H>
 #include <XAL/XScope.H>
 #include <MM/MM.H>
-#include <Arch/X64/Paging.H>
-#include <MM/PMM.H>
-#include <MM/VMM.H>
-#include <MM/Heap.H>
 #include <info.h>
-#include <Arch/X64/IDT.H>
+#include <Int/IDT.H>
 #include <IAL/IAL.H>
 #include <IAL/PIC.H>
  
@@ -65,7 +59,7 @@ static VOID KernelRemapFramebuffer(VOID) {
 	}
  
 	GAL_GOPSetVirtualBase(FbVirt);
-	fb_update_hw();
+	FbUpdateHw();
 }
  
 VOID KernelMain(
@@ -114,7 +108,7 @@ VOID KernelMain(
 	*/
 	GALSetBackend(GAL_GOPBackend(&BootInfo));
 	ConsoleInit();
-	fb_init();
+	FbInit();
  
 	printk("Shadow\r\n");
 	printk("[x] Boot info v%u, framebuffer %ux%u\r\n",

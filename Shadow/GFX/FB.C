@@ -23,11 +23,9 @@
 #define FB_VIRT_BASE 0xDF000000u
 /* --- Includes ---*/
 #include <GAL/GAL.H>
-#include <GFX/FB.H>
-#include <Lib/Math.H>
-#include <GFX/Font.H>
-#include <Lib/String.H>
-#include <MM/Heap.H>
+#include <GFX/GFX.H>
+#include <Lib/Lib.H>
+#include <MM/MM.H>
 // #include <screen/printk.h>
 
 /*
@@ -71,7 +69,7 @@ static struct {
 /* ==========================================================================
  * Initialize Framebuffer
  * ======================================================================= */
-int fb_init(void) {
+int FbInit(void) {
   /* TODO: bring this back once mm/paging.c is ported. Framebuffer
    * addresses from any backend are meaningless until paging is real —
    * this used to guard fb_init() from being called too early. */
@@ -137,7 +135,7 @@ int fb_init(void) {
   return 0;
 }
 
-VOID fb_update_hw(VOID) {
+VOID FbUpdateHw(VOID) {
   _GAL_MODE Mode;
   GALGetMode(&Mode);
  
@@ -155,7 +153,7 @@ VOID fb_update_hw(VOID) {
 /* ==========================================================================
  * Present backbuffer to screen
  * ======================================================================= */
-VOID fb_present(VOID) {
+VOID FbPresent(VOID) {
   if (!fb.Initialized)
     return;
  
@@ -195,7 +193,7 @@ VOID fb_present(VOID) {
 }
 
 
-UINT32 fb_pack_pixel(UINT8 r, UINT8 g, UINT8 b) {
+UINT32 FbPackPixel(UINT8 r, UINT8 g, UINT8 b) {
   if (FbHw.Bpp == 32) {
     if (FbHw.RedMask == 0x00FF0000) {
       return ((UINT32)r << 16) | ((UINT32)g << 8) | b;
@@ -225,57 +223,57 @@ UINT32 fb_pack_pixel(UINT8 r, UINT8 g, UINT8 b) {
 /* ==========================================================================
  * Color helpers
  * ======================================================================= */
-UINT32 gfx_theme_color(_GFX_THEME_COLOR c) {
+UINT32 GfxThemeColor(_GFX_THEME_COLOR c) {
   switch (c) {
   case GFX_BG_DESKTOP:
-    return fb_pack_pixel(20, 30, 100);
+    return FbPackPixel(20, 30, 100);
   case GFX_BG_PANEL:
-    return fb_pack_pixel(40, 45, 60);
+    return FbPackPixel(40, 45, 60);
   case GFX_BG_TITLE:
-    return fb_pack_pixel(80, 90, 120);
+    return FbPackPixel(80, 90, 120);
   case GFX_BG_HIGHLIGHT:
-    return fb_pack_pixel(100, 120, 160);
+    return FbPackPixel(100, 120, 160);
   case GFX_BG_BUTTON:
-    return fb_pack_pixel(60, 70, 90);
+    return FbPackPixel(60, 70, 90);
   case GFX_BG_BUTTON_HOVER:
-    return fb_pack_pixel(80, 95, 120);
+    return FbPackPixel(80, 95, 120);
   case GFX_FG_TEXT:
-    return fb_pack_pixel(255, 255, 255);
+    return FbPackPixel(255, 255, 255);
   case GFX_FG_TEXT_DIM:
-    return fb_pack_pixel(180, 180, 200);
+    return FbPackPixel(180, 180, 200);
   case GFX_FG_ACCENT:
-    return fb_pack_pixel(100, 200, 255);
+    return FbPackPixel(100, 200, 255);
   case GFX_BORDER_LIGHT:
-    return fb_pack_pixel(120, 130, 150);
+    return FbPackPixel(120, 130, 150);
   case GFX_BORDER_DARK:
-    return fb_pack_pixel(20, 25, 35);
+    return FbPackPixel(20, 25, 35);
   case GFX_RED:
-    return fb_pack_pixel(255, 0, 0);
+    return FbPackPixel(255, 0, 0);
   case GFX_GREEN:
-    return fb_pack_pixel(0, 255, 0);
+    return FbPackPixel(0, 255, 0);
   case GFX_BLUE:
-    return fb_pack_pixel(0, 0, 255);
+    return FbPackPixel(0, 0, 255);
   case GFX_YELLOW:
-    return fb_pack_pixel(255, 255, 0);
+    return FbPackPixel(255, 255, 0);
   case GFX_WHITE:
-    return fb_pack_pixel(255, 255, 255);
+    return FbPackPixel(255, 255, 255);
   case GFX_BLACK:
-    return fb_pack_pixel(0, 0, 0);
+    return FbPackPixel(0, 0, 0);
   default:
-    return fb_pack_pixel(255, 255, 255);
+    return FbPackPixel(255, 255, 255);
   }
 }
 
 /* ==========================================================================
  * Basic Drawing
  * ======================================================================= */
-VOID fb_clear(UINT32 color) {
+VOID FbClear(UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_clear(&fb.Back, color);
+  GfxClear(&fb.Back, color);
 }
 
-VOID gfx_clear(_PGFX_SURFACE surface, UINT32 color) {
+VOID GfxClear(_PGFX_SURFACE surface, UINT32 color) {
   for (UINT32 y = 0; y < surface->Height; y++) {
     UINT32 *row = surface->Pixels + y * surface->PitchPx;
     for (UINT32 x = 0; x < surface->Width; x++) {
@@ -284,26 +282,25 @@ VOID gfx_clear(_PGFX_SURFACE surface, UINT32 color) {
   }
 }
 
-VOID fb_put_pixel(UINT32 x, UINT32 y, UINT32 color) {
+VOID FbPutPixel(UINT32 x, UINT32 y, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_put_pixel(&fb.Back, x, y, color);
+  GfxPutPixel(&fb.Back, x, y, color);
 }
-VOID gfx_put_pixel(_PGFX_SURFACE surface, UINT32 x, UINT32 y,
-                   UINT32 color) {
+VOID GfxPutPixel(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 color) {
   if (x >= surface->Width || y >= surface->Height)
     return;
   surface->Pixels[y * surface->PitchPx + x] = color;
 }
 
-VOID fb_fill_rect(UINT32 x, UINT32 y, UINT32 w, UINT32 h,
+VOID FbFillRect(UINT32 x, UINT32 y, UINT32 w, UINT32 h,
                   UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_fill_rect(&fb.Back, x, y, w, h, color);
+  GfxFillRect(&fb.Back, x, y, w, h, color);
 }
 
-VOID gfx_fill_rect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
+VOID GfxFillRect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
                    UINT32 h, UINT32 color) {
   if (x + w > surface->Width)
     w = surface->Width - x;
@@ -320,18 +317,18 @@ VOID gfx_fill_rect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
   }
 }
 
-VOID fb_draw_rect(UINT32 x, UINT32 y, UINT32 w, UINT32 h,
+VOID FbDrawRect(UINT32 x, UINT32 y, UINT32 w, UINT32 h,
                   UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_rect(&fb.Back, x, y, w, h, color);
+  GfxDrawRect(&fb.Back, x, y, w, h, color);
 }
-VOID gfx_draw_rect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
+VOID GfxDrawRect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
                    UINT32 h, UINT32 color) {
-  gfx_draw_line(surface, x, y, x + w, y, color);
-  gfx_draw_line(surface, x, y, x, y + h, color);
-  gfx_draw_line(surface, x + w, y, x + w, y + h, color);
-  gfx_draw_line(surface, x, y + h, x + w, y + h, color);
+  GfxDrawLine(surface, x, y, x + w, y, color);
+  GfxDrawLine(surface, x, y, x, y + h, color);
+  GfxDrawLine(surface, x + w, y, x + w, y + h, color);
+  GfxDrawLine(surface, x, y + h, x + w, y + h, color);
 }
 
 /* ==========================================================================
@@ -339,20 +336,20 @@ VOID gfx_draw_rect(_PGFX_SURFACE surface, UINT32 x, UINT32 y, UINT32 w,
  * ======================================================================= */
 static inline int abs(int x) { return x < 0 ? -x : x; }
 
-VOID fb_draw_line(int x0, int y0, int x1, int y1, UINT32 color) {
+VOID FbDrawLine(int x0, int y0, int x1, int y1, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_line(&fb.Back, x0, y0, x1, y1, color);
+  GfxDrawLine(&fb.Back, x0, y0, x1, y1, color);
 }
 
-VOID gfx_draw_line(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
+VOID GfxDrawLine(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
                    UINT32 color) {
   int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
   int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
   int err = dx + dy, e2;
 
   while (1) {
-    gfx_put_pixel(surface, x0, y0, color);
+    GfxPutPixel(surface, x0, y0, color);
     if (x0 == x1 && y0 == y1)
       break;
     e2 = 2 * err;
@@ -369,24 +366,24 @@ VOID gfx_draw_line(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
 
 VOID gfx_hline(_PGFX_SURFACE surface, int x, int y, int w, UINT32 color) {
   int h = 1;
-  gfx_fill_rect(surface, (UINT32)x, (UINT32)y, (UINT32)w, h, color);
+  GfxFillRect(surface, (UINT32)x, (UINT32)y, (UINT32)w, h, color);
 }
 
 VOID gfx_vline(_PGFX_SURFACE surface, int x, int y, int h, UINT32 color) {
   int w = 1;
-  gfx_fill_rect(surface, (UINT32)x, (UINT32)y, w, (UINT32)h, color);
+  GfxFillRect(surface, (UINT32)x, (UINT32)y, w, (UINT32)h, color);
 }
 
 /* ==========================================================================
  * Circle (midpoint algorithm)
  * ======================================================================= */
-VOID fb_draw_circle(int cx, int cy, int radius, UINT32 color) {
+VOID FbDrawCircle(int cx, int cy, int radius, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_circle(&fb.Back, cx, cy, radius, color);
+  GfxDrawCircle(&fb.Back, cx, cy, radius, color);
 }
 
-VOID gfx_draw_circle(_PGFX_SURFACE surface, int cx, int cy, int radius,
+VOID GfxDrawCircle(_PGFX_SURFACE surface, int cx, int cy, int radius,
                      UINT32 color) {
   if (radius <= 0)
     return;
@@ -398,14 +395,14 @@ VOID gfx_draw_circle(_PGFX_SURFACE surface, int cx, int cy, int radius,
   int err = dx - (radius << 1);
 
   while (x >= y) {
-    gfx_put_pixel(surface, cx + x, cy + y, color);
-    gfx_put_pixel(surface, cx + y, cy + x, color);
-    gfx_put_pixel(surface, cx - y, cy + x, color);
-    gfx_put_pixel(surface, cx - x, cy + y, color);
-    gfx_put_pixel(surface, cx - x, cy - y, color);
-    gfx_put_pixel(surface, cx - y, cy - x, color);
-    gfx_put_pixel(surface, cx + y, cy - x, color);
-    gfx_put_pixel(surface, cx + x, cy - y, color);
+    GfxPutPixel(surface, cx + x, cy + y, color);
+    GfxPutPixel(surface, cx + y, cy + x, color);
+    GfxPutPixel(surface, cx - y, cy + x, color);
+    GfxPutPixel(surface, cx - x, cy + y, color);
+    GfxPutPixel(surface, cx - x, cy - y, color);
+    GfxPutPixel(surface, cx - y, cy - x, color);
+    GfxPutPixel(surface, cx + y, cy - x, color);
+    GfxPutPixel(surface, cx + x, cy - y, color);
 
     if (err <= 0) {
       y++;
@@ -423,9 +420,9 @@ VOID gfx_draw_circle(_PGFX_SURFACE surface, int cx, int cy, int radius,
 VOID fb_draw_char(UINT32 x, UINT32 y, char c, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_char(&fb.Back, x, y, c, color);
+  GfxDrawChar(&fb.Back, x, y, c, color);
 }
-VOID gfx_draw_char(_PGFX_SURFACE surface, UINT32 x, UINT32 y, char c,
+VOID GfxDrawChar(_PGFX_SURFACE surface, UINT32 x, UINT32 y, char c,
                    UINT32 color) {
   if (x >= surface->Width || y >= surface->Height)
     return;
@@ -443,7 +440,7 @@ VOID gfx_draw_char(_PGFX_SURFACE surface, UINT32 x, UINT32 y, char c,
       if (x + col >= surface->Width)
         break;
       if (line & (1u << (7 - col))) {
-        gfx_put_pixel(surface, x + col, y + row, color);
+        GfxPutPixel(surface, x + col, y + row, color);
       }
     }
   }
@@ -452,16 +449,16 @@ VOID gfx_draw_char(_PGFX_SURFACE surface, UINT32 x, UINT32 y, char c,
 VOID fb_draw_string(UINT32 x, UINT32 y, const char *str, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_string(&fb.Back, x, y, str, color);
+  GfxDrawString(&fb.Back, x, y, str, color);
 }
-VOID gfx_draw_string(_PGFX_SURFACE surface, UINT32 x, UINT32 y,
+VOID GfxDrawString(_PGFX_SURFACE surface, UINT32 x, UINT32 y,
                      const char *str, UINT32 color) {
   if (!str)
     return;
 
   UINT32 cx = x;
   while (*str) {
-    gfx_draw_char(surface, cx, y, *str++, color);
+    GfxDrawChar(surface, cx, y, *str++, color);
     cx += 8;
   }
 }
@@ -472,10 +469,10 @@ VOID gfx_draw_string(_PGFX_SURFACE surface, UINT32 x, UINT32 y,
 VOID fb_fill_circle(int cx, int cy, int radius, UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_fill_circle(&fb.Back, cx, cy, radius, color);
+  GfxFillCircle(&fb.Back, cx, cy, radius, color);
 }
 
-VOID gfx_fill_circle(_PGFX_SURFACE surface, int cx, int cy, int radius,
+VOID GfxFillCircle(_PGFX_SURFACE surface, int cx, int cy, int radius,
                      UINT32 color) {
   if (radius <= 0)
     return;
@@ -509,17 +506,16 @@ VOID gfx_fill_circle(_PGFX_SURFACE surface, int cx, int cy, int radius,
  * Thick line: draw a line with circular pen of given radius
  * Uses Bresenham + perpendicular fill
  * ======================================================================= */
-VOID fb_draw_line_thick(int x0, int y0, int x1, int y1, int thickness,
+VOID FbDrawLineThick(int x0, int y0, int x1, int y1, int thickness,
                         UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_line_thick(&fb.Back, x0, y0, x1, y1, thickness, color);
+  GfxDrawLineThick(&fb.Back, x0, y0, x1, y1, thickness, color);
 }
 
-VOID gfx_draw_line_thick(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
-                         int thickness, UINT32 color) {
+VOID GfxDrawLineThick(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1, int thickness, UINT32 color) {
   if (thickness <= 1) {
-    gfx_draw_line(surface, x0, y0, x1, y1, color);
+    GfxDrawLine(surface, x0, y0, x1, y1, color);
     return;
   }
 
@@ -535,7 +531,7 @@ VOID gfx_draw_line_thick(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
 
   while (1) {
     /* Draw a filled circle at each pixel of the line */
-    gfx_fill_circle(surface, x0, y0, r, color);
+    GfxFillCircle(surface, x0, y0, r, color);
 
     if (x0 == x1 && y0 == y1)
       break;
@@ -556,17 +552,16 @@ VOID gfx_draw_line_thick(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
  * Vector: line from (x0,y0) at angle with magnitude
  * Angle: tenths of degrees, 0 = right (3 o'clock), CCW
  * ======================================================================= */
-VOID fb_draw_vector(int x0, int y0, int angle, int magnitude, int thickness,
+VOID FbDrawVector(int x0, int y0, int angle, int magnitude, int thickness,
                     UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_vector(&fb.Back, x0, y0, angle, magnitude, thickness, color);
+  GfxDrawVector(&fb.Back, x0, y0, angle, magnitude, thickness, color);
 }
 
-VOID gfx_draw_vector(_PGFX_SURFACE surface, int x0, int y0, int angle,
-                     int magnitude, int thickness, UINT32 color) {
-  vec2i_t end = vec2i_polar_bradians(x0, y0, magnitude, angle);
-  gfx_draw_line_thick(surface, x0, y0, end.x, end.y, thickness, color);
+VOID GfxDrawVector(_PGFX_SURFACE surface, int x0, int y0, int angle, int magnitude, int thickness, UINT32 color) {
+  Vec2I end = vec2i_polar_bradians(x0, y0, magnitude, angle);
+  GfxDrawLineThick(surface, x0, y0, end.x, end.y, thickness, color);
 }
 
 /* ==========================================================================
@@ -576,10 +571,10 @@ VOID fb_draw_arc(int cx, int cy, int radius, int start_angle, int end_angle,
                  UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_draw_arc(&fb.Back, cx, cy, radius, start_angle, end_angle, color);
+  GfxDrawArc(&fb.Back, cx, cy, radius, start_angle, end_angle, color);
 }
 
-VOID gfx_draw_arc(_PGFX_SURFACE surface, int cx, int cy, int radius,
+VOID GfxDrawArc(_PGFX_SURFACE surface, int cx, int cy, int radius,
                   int start_angle, int end_angle, UINT32 color) {
   if (radius <= 0)
     return;
@@ -602,8 +597,8 @@ VOID gfx_draw_arc(_PGFX_SURFACE surface, int cx, int cy, int radius,
   int done = 0;
 
   while (!done) {
-    vec2i_t p = vec2i_polar_bradians(cx, cy, radius, a);
-    gfx_put_pixel(surface, p.x, p.y, color);
+    Vec2I p = vec2i_polar_bradians(cx, cy, radius, a);
+    GfxPutPixel(surface, p.x, p.y, color);
 
     if (a == end_angle) {
       done = 1;
@@ -628,10 +623,10 @@ VOID fb_fill_sector(int cx, int cy, int radius, int start_angle, int end_angle,
                     UINT32 color) {
   if (!fb.Initialized)
     return;
-  gfx_fill_sector(&fb.Back, cx, cy, radius, start_angle, end_angle, color);
+  GfxFillSector(&fb.Back, cx, cy, radius, start_angle, end_angle, color);
 }
 
-VOID gfx_fill_sector(_PGFX_SURFACE surface, int cx, int cy, int radius,
+VOID GfxFillSector(_PGFX_SURFACE surface, int cx, int cy, int radius,
                      int start_angle, int end_angle, UINT32 color) {
   if (radius <= 0)
     return;
@@ -646,8 +641,8 @@ VOID gfx_fill_sector(_PGFX_SURFACE surface, int cx, int cy, int radius,
   int step = 15; /* 1.5 degree triangles */
   int a = start_angle;
 
-  vec2i_t center = vec2i(cx, cy);
-  vec2i_t prev = vec2i_polar_bradians(cx, cy, radius, a);
+  Vec2I center = vec2i(cx, cy);
+  Vec2I prev = vec2i_polar_bradians(cx, cy, radius, a);
 
   while (1) {
     int next_a = a + step;
@@ -657,8 +652,8 @@ VOID gfx_fill_sector(_PGFX_SURFACE surface, int cx, int cy, int radius,
       break;
     }
 
-    vec2i_t next = vec2i_polar_bradians(cx, cy, radius, next_a);
-    gfx_fill_triangle(surface, center.x, center.y, prev.x, prev.y, next.x,
+    Vec2I next = vec2i_polar_bradians(cx, cy, radius, next_a);
+    GfxFillTriangle(surface, center.x, center.y, prev.x, prev.y, next.x,
                       next.y, color);
 
     if (next_a == end_angle)
@@ -758,10 +753,10 @@ VOID fb_fill_triangle(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 col
   if (!fb.Initialized) {
     return;
   }
-  gfx_fill_triangle(&fb.Back, x0, y0, x1, y1, x2, y2, color);
+  GfxFillTriangle(&fb.Back, x0, y0, x1, y1, x2, y2, color);
 }
 
-VOID gfx_fill_triangle(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1, int x2, int y2, UINT32 color) {
+VOID GfxFillTriangle(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1, int x2, int y2, UINT32 color) {
   /* Sort by Y */
   if (y0 > y1) {
     int t;
@@ -828,12 +823,12 @@ int gfx_get_string_Width(const char *str) {
  * ======================================================================= */
 VOID gfx_panel(_PGFX_SURFACE surface, int x, int y, int w, int h,
                UINT32 bg) {
-  gfx_fill_rect(surface, x, y, w, h, bg);
+  GfxFillRect(surface, x, y, w, h, bg);
 }
 
 VOID gfx_bevel_out(_PGFX_SURFACE surface, int x, int y, int w, int h) {
-  UINT32 light = gfx_theme_color(GFX_BORDER_LIGHT);
-  UINT32 dark = gfx_theme_color(GFX_BORDER_DARK);
+  UINT32 light = GfxThemeColor(GFX_BORDER_LIGHT);
+  UINT32 dark = GfxThemeColor(GFX_BORDER_DARK);
   gfx_hline(surface, x, y, w, light);
   gfx_vline(surface, x, y, h, light);
   gfx_hline(surface, x, y + h - 1, w, dark);
@@ -841,8 +836,8 @@ VOID gfx_bevel_out(_PGFX_SURFACE surface, int x, int y, int w, int h) {
 }
 
 VOID gfx_bevel_in(_PGFX_SURFACE surface, int x, int y, int w, int h) {
-  UINT32 light = gfx_theme_color(GFX_BORDER_LIGHT);
-  UINT32 dark = gfx_theme_color(GFX_BORDER_DARK);
+  UINT32 light = GfxThemeColor(GFX_BORDER_LIGHT);
+  UINT32 dark = GfxThemeColor(GFX_BORDER_DARK);
   gfx_hline(surface, x, y, w, dark);
   gfx_vline(surface, x, y, h, dark);
   gfx_hline(surface, x, y + h - 1, w, light);
@@ -854,12 +849,12 @@ VOID gfx_bevel_in(_PGFX_SURFACE surface, int x, int y, int w, int h) {
  * ======================================================================= */
 VOID gfx_title_bar(_PGFX_SURFACE surface, int x, int y, int w,
                    const char *title) {
-  UINT32 bg = gfx_theme_color(GFX_BG_TITLE);
-  UINT32 fg = gfx_theme_color(GFX_FG_TEXT);
+  UINT32 bg = GfxThemeColor(GFX_BG_TITLE);
+  UINT32 fg = GfxThemeColor(GFX_FG_TEXT);
 
-  gfx_fill_rect(surface, x, y, w, 20, bg);
+  GfxFillRect(surface, x, y, w, 20, bg);
   if (title) {
-    gfx_draw_string(surface, x + 4, y + 6, title, fg);
+    GfxDrawString(surface, x + 4, y + 6, title, fg);
   }
   gfx_bevel_out(surface, x, y, w, 20);
 }
@@ -869,11 +864,11 @@ VOID gfx_title_bar(_PGFX_SURFACE surface, int x, int y, int w,
  * ======================================================================= */
 VOID gfx_button(_PGFX_SURFACE surface, int x, int y, int w, int h,
                 const char *label, int pressed) {
-  UINT32 bg = pressed ? gfx_theme_color(GFX_BG_BUTTON_HOVER)
-                        : gfx_theme_color(GFX_BG_BUTTON);
-  UINT32 fg = gfx_theme_color(GFX_FG_TEXT);
+  UINT32 bg = pressed ? GfxThemeColor(GFX_BG_BUTTON_HOVER)
+                        : GfxThemeColor(GFX_BG_BUTTON);
+  UINT32 fg = GfxThemeColor(GFX_FG_TEXT);
 
-  gfx_fill_rect(surface, x, y, w, h, bg);
+  GfxFillRect(surface, x, y, w, h, bg);
   if (pressed == 1) {
     gfx_bevel_in(surface, x, y, w, h);
   } else {
@@ -884,7 +879,7 @@ VOID gfx_button(_PGFX_SURFACE surface, int x, int y, int w, int h,
     int tw = gfx_get_string_Width(label);
     int tx = x + (w - tw) / 2;
     int ty = y + (h - 8) / 2;
-    gfx_draw_string(surface, tx, ty, label, fg);
+    GfxDrawString(surface, tx, ty, label, fg);
   }
 }
 
@@ -893,12 +888,12 @@ VOID gfx_button(_PGFX_SURFACE surface, int x, int y, int w, int h,
  * ======================================================================= */
 VOID gfx_progress_bar(_PGFX_SURFACE surface, int x, int y, int w, int h,
                       int percent, UINT32 fill, UINT32 empty) {
-  gfx_fill_rect(surface, x, y, w, h, empty);
+  GfxFillRect(surface, x, y, w, h, empty);
   gfx_bevel_in(surface, x, y, w, h);
 
   int fill_w = (w - 4) * percent / 100;
   if (fill_w > 0) {
-    gfx_fill_rect(surface, x + 2, y + 2, fill_w, h - 4, fill);
+    GfxFillRect(surface, x + 2, y + 2, fill_w, h - 4, fill);
   }
 }
 
@@ -907,12 +902,12 @@ VOID gfx_progress_bar(_PGFX_SURFACE surface, int x, int y, int w, int h,
  * ======================================================================= */
 VOID gfx_list(_PGFX_SURFACE surface, int x, int y, int w, int h,
               const char **items, int count, int selected) {
-  UINT32 bg = gfx_theme_color(GFX_BG_PANEL);
-  UINT32 fg = gfx_theme_color(GFX_FG_TEXT);
-  UINT32 hi = gfx_theme_color(GFX_BG_HIGHLIGHT);
-  UINT32 hifg = gfx_theme_color(GFX_FG_ACCENT);
+  UINT32 bg = GfxThemeColor(GFX_BG_PANEL);
+  UINT32 fg = GfxThemeColor(GFX_FG_TEXT);
+  UINT32 hi = GfxThemeColor(GFX_BG_HIGHLIGHT);
+  UINT32 hifg = GfxThemeColor(GFX_FG_ACCENT);
 
-  gfx_fill_rect(surface, x, y, w, h, bg);
+  GfxFillRect(surface, x, y, w, h, bg);
   gfx_bevel_in(surface, x, y, w, h);
 
   int content_x = x + 4;
@@ -933,8 +928,8 @@ VOID gfx_list(_PGFX_SURFACE surface, int x, int y, int w, int h,
     UINT32 row_bg = (idx == selected) ? hi : bg;
     UINT32 row_fg = (idx == selected) ? hifg : fg;
 
-    gfx_fill_rect(surface, content_x, row_y, content_w, row_h, row_bg);
-    gfx_draw_string(surface, content_x + 4, row_y + 6, items[idx], row_fg);
+    GfxFillRect(surface, content_x, row_y, content_w, row_h, row_bg);
+    GfxDrawString(surface, content_x + 4, row_y + 6, items[idx], row_fg);
   }
 }
 
@@ -943,56 +938,56 @@ VOID gfx_list(_PGFX_SURFACE surface, int x, int y, int w, int h,
  * ======================================================================= */
 VOID gfx_status_bar(_PGFX_SURFACE surface, int x, int y, int w,
                     const char *text) {
-  UINT32 bg = gfx_theme_color(GFX_BG_TITLE);
-  UINT32 fg = gfx_theme_color(GFX_FG_TEXT_DIM);
+  UINT32 bg = GfxThemeColor(GFX_BG_TITLE);
+  UINT32 fg = GfxThemeColor(GFX_FG_TEXT_DIM);
 
-  gfx_fill_rect(surface, x, y, w, 24, bg);
+  GfxFillRect(surface, x, y, w, 24, bg);
   gfx_bevel_out(surface, x, y, w, 24);
   if (text) {
-    gfx_draw_string(surface, x + 4, y + 8, text, fg);
+    GfxDrawString(surface, x + 4, y + 8, text, fg);
   }
 }
 
 /* ==========================================================================
  * Desktop background
  * ======================================================================= */
-VOID gfx_desktop(_PGFX_SURFACE surface) {
-  gfx_clear(surface, gfx_theme_color(GFX_BG_DESKTOP));
+VOID GfxDesktop(_PGFX_SURFACE surface) {
+  GfxClear(surface, GfxThemeColor(GFX_BG_DESKTOP));
 }
 
 /* ==========================================================================
  * Design 2
  * ======================================================================= */
-VOID gfx_logo_design2(_PGFX_SURFACE surface, int x, int y) {
-  gfx_fill_rect(surface, x, y, 150, 150, gfx_theme_color(GFX_RED));
-  gfx_fill_rect(surface, x + 25, y + 25, 150, 150, gfx_theme_color(GFX_GREEN));
-  gfx_fill_rect(surface, x + 50, y + 50, 150, 150, gfx_theme_color(GFX_BLUE));
-  gfx_fill_rect(surface, x + 50, y + 50, 125, 125, gfx_theme_color(GFX_RED));
-  gfx_draw_string(surface, x, y - 10, "Welcome to AmitX!",
-                  gfx_theme_color(GFX_WHITE));
+VOID GfxLogoDesign2(_PGFX_SURFACE surface, int x, int y) {
+  GfxFillRect(surface, x, y, 150, 150, GfxThemeColor(GFX_RED));
+  GfxFillRect(surface, x + 25, y + 25, 150, 150, GfxThemeColor(GFX_GREEN));
+  GfxFillRect(surface, x + 50, y + 50, 150, 150, GfxThemeColor(GFX_BLUE));
+  GfxFillRect(surface, x + 50, y + 50, 125, 125, GfxThemeColor(GFX_RED));
+  GfxDrawString(surface, x, y - 10, "Welcome to AmitX!",
+                  GfxThemeColor(GFX_WHITE));
 }
 
-VOID gfx_logo_os(_PGFX_SURFACE surface, int x, int y) {
-  gfx_logo_phonon(surface, x, y);
-  gfx_logo_shadow(surface, x + 160, y);
+VOID GfxLogoOs(_PGFX_SURFACE surface, int x, int y) {
+  GfxLogoPhonon(surface, x, y);
+  GfxLogoShadow(surface, x + 160, y);
 }
 
-VOID gfx_logo_phonon(_PGFX_SURFACE surface, int x, int y) {
-  gfx_fill_rect(surface, x + 5, y + 5, 70, 70, fb_pack_pixel(0xF7, 0xA8, 0xB8));
-  gfx_fill_rect(surface, x + 80, y, 70, 70, gfx_theme_color(GFX_GREEN));
-  gfx_fill_rect(surface, x, y + 80, 70, 70, gfx_theme_color(GFX_BLUE));
-  gfx_fill_rect(surface, x + 75, y + 75, 70, 70, gfx_theme_color(GFX_RED));
-  gfx_draw_string(surface, x + 10, y - 10, "Welcome to Phonon!",
-                  gfx_theme_color(GFX_WHITE));
+VOID GfxLogoPhonon(_PGFX_SURFACE surface, int x, int y) {
+  GfxFillRect(surface, x + 5, y + 5, 70, 70, FbPackPixel(0xF7, 0xA8, 0xB8));
+  GfxFillRect(surface, x + 80, y, 70, 70, GfxThemeColor(GFX_GREEN));
+  GfxFillRect(surface, x, y + 80, 70, 70, GfxThemeColor(GFX_BLUE));
+  GfxFillRect(surface, x + 75, y + 75, 70, 70, GfxThemeColor(GFX_RED));
+  GfxDrawString(surface, x + 10, y - 10, "Welcome to Phonon!",
+                  GfxThemeColor(GFX_WHITE));
 }
 
-VOID gfx_logo_shadow(_PGFX_SURFACE surface, int x, int y) {
-  gfx_draw_rect(surface, x, y, 70, 70, fb_pack_pixel(0xF7, 0xA8, 0xB8));
-  gfx_draw_rect(surface, x + 75, y + 5, 70, 70, gfx_theme_color(GFX_GREEN));
-  gfx_draw_rect(surface, x + 5, y + 75, 70, 70, gfx_theme_color(GFX_BLUE));
-  gfx_fill_rect(surface, x + 80, y + 80, 70, 70, gfx_theme_color(GFX_RED));
-  gfx_draw_string(surface, x, y - 10, "Powered by Shadow!",
-                  gfx_theme_color(GFX_WHITE));
+VOID GfxLogoShadow(_PGFX_SURFACE surface, int x, int y) {
+  GfxDrawRect(surface, x, y, 70, 70, FbPackPixel(0xF7, 0xA8, 0xB8));
+  GfxDrawRect(surface, x + 75, y + 5, 70, 70, GfxThemeColor(GFX_GREEN));
+  GfxDrawRect(surface, x + 5, y + 75, 70, 70, GfxThemeColor(GFX_BLUE));
+  GfxFillRect(surface, x + 80, y + 80, 70, 70, GfxThemeColor(GFX_RED));
+  GfxDrawString(surface, x, y - 10, "Powered by Shadow!",
+                  GfxThemeColor(GFX_WHITE));
 }
 
 int point_in_rect(int px, int py, int x, int y, int w, int h) {

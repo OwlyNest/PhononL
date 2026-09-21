@@ -24,8 +24,8 @@
 
 /* --- Includes ---*/
 #include <IAL/IAL.H>
-#include <Arch/X64/IDT.H>
-#include <Lib/PrintK.H>
+#include <Int/IDT.H>
+#include <Lib/Lib.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 typedef struct IDT_ENTRY {

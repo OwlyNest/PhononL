@@ -1,5 +1,5 @@
 #include <MM/Heap.H>
-#include <Lib/String.H>
+#include <Lib/Lib.H>
 
 INT StrCmp(PCCHAR S1, PCCHAR S2) {
     while (*S1 && (*S1 == *S2)) {

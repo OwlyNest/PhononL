@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/GFX/Console.H - simple scrolling text console for printk
+	* Shadow/Include/Arch/X64/Paging.H - [Enter description]
 	* Author:   amity
-	* Date:     Tue Sep 15 00:20:36 2026
+	* Date:     Wed Sep 16 14:29:12 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,31 +20,16 @@
 */
 
 /* --- Macros ---*/
-#ifndef __GFX_CONSOLE_H__
-#define __GFX_CONSOLE_H__
-
-#define CONSOLE_COLS        80
-#define CONSOLE_ROWS        40
-#define CHAR_W              8
-#define CHAR_H              8
-#define CONSOLE_FG          GfxThemeColor(GFX_FG_TEXT)
-#define CONSOLE_BG          GfxThemeColor(GFX_BG_DESKTOP)
-
-#define CONSOLE_DEFAULT_TAB_WIDTH 4
+#ifndef __ARCH_X64_PAGING_H__
+#define __ARCH_X64_PAGING_H__
 
 /* --- Includes ---*/
-#include <GFX/FB.H>
-#include <Lib/Lib.H>
+#include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-VOID ConsoleInit(VOID);
-VOID ConsoleClear(VOID);
-VOID ConsoleWrite(PCCHAR str);
-VOID ConsoleRedraw(VOID);
-INT  ConsoleIsDirty(VOID);
 
-#endif /* __GFX_CONSOLE_H__ */
+#endif /* __ARCH_X64_PAGING_H__ */

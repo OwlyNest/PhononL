@@ -2,29 +2,4 @@
 #ifndef __LIB_STRING_H__
 #define __LIB_STRING_H__
 
-#include <stddef.h>
-
-INT    StrCmp(PCCHAR S1, PCCHAR S2);
-UINT32 AtoI(PCCHAR Str);
-VOID   ItoA(INT n, PCHAR Str);
-PCHAR  StrCat(PCHAR Dest, PCCHAR Src);
-PCHAR  StrnCat(PCHAR Dest, PCCHAR Src, SIZE_T N);
-PCHAR  StrCpy(PCHAR Dest, PCCHAR Src);
-PCHAR  StrChr(PCCHAR srt, INT C);
-PCHAR  StrDup(PCCHAR Str);
-SIZE_T StrLen(PCCHAR Str);
-INT    StrnCmp(PCCHAR S1, PCCHAR S2, SIZE_T N);
-PCHAR  StrnCpy(PCHAR Dest, PCCHAR Src, SIZE_T N);
-SIZE_T StrnLen(PCCHAR s, SIZE_T maxLen);
-PCHAR  StrChrNul(PCCHAR s, INT C);
-PCHAR  StrChr(PCCHAR s, INT C);
-PCHAR  StrRChr(PCCHAR S, INT C);
-PCHAR  StrnDup(PCCHAR s, SIZE_T N);
-
-PVOID MemSet(PVOID Dest, INT val, SIZE_T Len);
-PVOID MemCpy(PVOID Dest, PCVOID Src, SIZE_T Len);
-INT   MemCmp(PCVOID S1, PCVOID S2, SIZE_T N);
-PVOID MemMove(PVOID Dest, PCVOID Src, SIZE_T N);
-PVOID MemChr(PCVOID Str, INT C, SIZE_T N);
-
 #endif

@@ -27,13 +27,10 @@
 	* whatever was mapped next.
 */
 
-#include "Internal/Types.H"
 #define VMM_GUARD_PAGES 1
 
 /* --- Includes ---*/
 #include <MM/MM.H>
-#include <Arch/X64/Paging.H>
-#include <MM/PMM.H>
 #include <XAL/XScope.H>
 #include <MM/VMM.H>
 

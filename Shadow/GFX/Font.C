@@ -27,7 +27,7 @@
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
-const UINT8 font8x8[256][8] = {
+CONST UINT8 font8x8[256][8] = {
     /* 0 0x00 '^@' */ {
         0x00, /* 00000000 */
         0x00, /* 00000000 */

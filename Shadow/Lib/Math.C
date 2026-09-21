@@ -22,8 +22,7 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
-#include <stdint.h>
-#include <Lib/Math.H>
+#include <Lib/Lib.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 static const INT32 cordic_atan_table[CORDIC_ITERATIONS] = {
@@ -161,12 +160,12 @@ INT angle_to_bradians(INT tenths_of_degrees) {
  * Vector endpoint from polar coordinates
  * (cx, cy) = center, radius = length, angle = bradians
  * ======================================================================= */
-vec2i_t vec2i_polar_bradians(INT cx, INT cy, INT radius, INT angle) {
+Vec2I vec2i_polar_bradians(INT cx, INT cy, INT radius, INT angle) {
     INT angle_bradians = angle_to_bradians(angle);
     FX s = fx_sin_b(angle_bradians);
     FX c = fx_cos_b(angle_bradians);
 
-    vec2i_t v;
+    Vec2I v;
     v.x = cx + fx_to_int_rnd(fx_mul(c, fx_from_int(radius)));
     v.y = cy - fx_to_int_rnd(fx_mul(s, fx_from_int(radius)));
     return v;
@@ -178,7 +177,7 @@ vec2i_t vec2i_polar_bradians(INT cx, INT cy, INT radius, INT angle) {
 FX fx_sqrt(FX x) {
     if (x <= 0) return 0;
 
-    UINT32 v = (uint32_t)x;
+    UINT32 v = (UINT32)x;
     UINT32 res = 0;
     UINT32 bit = 1u << 30;
 
@@ -213,29 +212,29 @@ INT32 fx_to_int_rnd(FX f) {
 }
 
 FX fx_mul(FX a, FX b) {
-    return (FX)(((int64_t)a * (int64_t)b) >> FX_SHIFT);
+    return (FX)(((INT64)a * (INT64)b) >> FX_SHIFT);
 }
 
 FX fx_div(FX a, FX b) {
     if (b == 0) return 0;
-    return (FX)(((int64_t)a << FX_SHIFT) / (int64_t)b);
+    return (FX)(((INT64)a << FX_SHIFT) / (INT64)b);
 }
 
 /* ==========================================================================
  * Vector helpers (integer)
  * ======================================================================= */
-vec2i_t vec2i(INT x, INT y) {
-    vec2i_t v = { x, y };
+Vec2I vec2i(INT x, INT y) {
+    Vec2I v = { x, y };
     return v;
 }
 
-vec2i_t vec2i_add(vec2i_t a, vec2i_t b) {
-    vec2i_t v = { a.x + b.x, a.y + b.y };
+Vec2I vec2i_add(Vec2I a, Vec2I b) {
+    Vec2I v = { a.x + b.x, a.y + b.y };
     return v;
 }
 
-vec2i_t vec2i_sub(vec2i_t a, vec2i_t b) {
-    vec2i_t v = { a.x - b.x, a.y - b.y };
+Vec2I vec2i_sub(Vec2I a, Vec2I b) {
+    Vec2I v = { a.x - b.x, a.y - b.y };
     return v;
 }
 
@@ -243,8 +242,8 @@ vec2i_t vec2i_sub(vec2i_t a, vec2i_t b) {
  * Distance
  * ======================================================================= */
 INT32 idist_sq(INT x0, INT y0, INT x1, INT y1) {
-    INT32 dx = (int32_t)(x1 - x0);
-    INT32 dy = (int32_t)(y1 - y0);
+    INT32 dx = (INT32)(x1 - x0);
+    INT32 dy = (INT32)(y1 - y0);
     return dx * dx + dy * dy;
 }
 

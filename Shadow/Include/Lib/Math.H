@@ -29,11 +29,11 @@
 #define FX_SHIFT            16
 #define FX_ONE              (1 << FX_SHIFT)
 #define FX_MASK             (FX_ONE - 1)
-#define FX_FROM_INT(i)      ((int32_t)(i) << FX_SHIFT)
-#define FX_TO_INT(f)        ((int32_t)((f) >> FX_SHIFT))
-#define FX_TO_INT_RND(f)    ((int32_t)(((f) + (FX_ONE >> 1)) >> FX_SHIFT))
-#define FX_MUL(a, b)        ((int32_t)(((int64_t)(a) * (int64_t)(b)) >> FX_SHIFT))
-#define FX_DIV(a, b)        ((int32_t)((((int64_t)(a) << FX_SHIFT) / (int64_t)(b))))
+#define FX_FROM_INT(i)      ((INT32)(i) << FX_SHIFT)
+#define FX_TO_INT(f)        ((INT32)((f) >> FX_SHIFT))
+#define FX_TO_INT_RND(f)    ((INT32)(((f) + (FX_ONE >> 1)) >> FX_SHIFT))
+#define FX_MUL(a, b)        ((INT32)(((INT64)(a) * (INT64)(b)) >> FX_SHIFT))
+#define FX_DIV(a, b)        ((INT32)((((INT64)(a) << FX_SHIFT) / (INT64)(b))))
 #define ANGLE_FULL_TENTHS   3600     /* tenths of degrees */
 #define ANGLE_FULL_BRAD     65536    /* bradians: 0x10000 = 360° */
 #define BRAD_90             0x4000   /* 16384 */
@@ -41,49 +41,21 @@
 #define BRAD_270            0xC000   /* 49152 */
 
 /* --- Includes ---*/
-#include <stdint.h>
+
 /* --- Typedefs - Structs - Enums ---*/
 typedef INT32 FX;
 
 typedef struct {
     INT x;
     INT y;
-} vec2i_t;
+} Vec2I;
 
 typedef struct {
     FX x;
     FX y;
-} vec2f_t;
+} Vec2F;
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-/* Fixed-point basics */
-FX fx_from_int(INT32 i);
-INT32 fx_to_int(FX f);
-INT32 fx_to_int_rnd(FX f);
-FX fx_mul(FX a, FX b);
-FX fx_div(FX a, FX b);
-FX fx_sqrt(FX x);
-
-/* CORDIC trig: angle in bradians (0-65535, 0x10000 = 360°) */
-FX fx_sin_b(INT angle_bradians);
-FX fx_cos_b(INT angle_bradians);
-
-/* Angle conversion */
-INT angle_to_bradians(INT tenths_of_degrees);
-
-/* Vector helpers */
-vec2i_t vec2i(INT x, INT y);
-vec2i_t vec2i_add(vec2i_t a, vec2i_t b);
-vec2i_t vec2i_sub(vec2i_t a, vec2i_t b);
-vec2i_t vec2i_polar_bradians(INT cx, INT cy, INT radius, INT angle_bradians);
-
-/* Integer distance */
-int32_t idist(INT x0, INT y0, INT x1, INT y1);
-int32_t idist_sq(INT x0, INT y0, INT x1, INT y1);
-
-/* Clamp */
-INT32 iclamp(INT32 v, INT32 lo, INT32 hi);
-UINT32 uclamp(UINT32 v, UINT32 lo, UINT32 hi);
 #endif

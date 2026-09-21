@@ -1,0 +1,63 @@
+/*
+	* Shadow/Lib/Lib.xal - Library manifest
+*/
+
+XAL_META(Class, xSCAL)
+
+/* --- Math --- */
+/* Fixed-point basics */
+XAL_METHOD(FX,    fx_from_int,   (INT32 i))
+XAL_METHOD(INT32, fx_to_int,     (FX f))
+XAL_METHOD(INT32, fx_to_int_rnd, (FX f))
+XAL_METHOD(FX,    fx_mul,        (FX a, FX b))
+XAL_METHOD(FX,    fx_div,        (FX a, FX b))
+XAL_METHOD(FX,    fx_sqrt,       (FX x))
+
+/* CORDIC trig: angle in bradians (0-65535, 0x10000 = 360°) */
+XAL_METHOD(FX, fx_sin_b, (INT angle_bradians))
+XAL_METHOD(FX, fx_cos_b, (INT angle_bradians))
+
+/* Angle conversion */
+XAL_METHOD(INT, angle_to_bradians, (INT tenths_of_degrees))
+
+/* Vector helpers */
+XAL_METHOD(Vec2I, vec2i,                (INT x, INT y))
+XAL_METHOD(Vec2I, vec2i_add,            (Vec2I a, Vec2I b))
+XAL_METHOD(Vec2I, vec2i_sub,            (Vec2I a, Vec2I b))
+XAL_METHOD(Vec2I, vec2i_polar_bradians, (INT cx, INT cy, INT radius, INT angle_bradians))
+
+/* Integer distance */
+XAL_METHOD(INT32, idist,    (INT x0, INT y0, INT x1, INT y1))
+XAL_METHOD(INT32, idist_sq, (INT x0, INT y0, INT x1, INT y1))
+
+/* Clamp */
+XAL_METHOD(INT32,  iclamp, (INT32 v, INT32 lo, INT32 hi))
+XAL_METHOD(UINT32, uclamp, (UINT32 v, UINT32 lo, UINT32 hi))
+
+/* --- Printk --- */
+XAL_METHOD(INT,  kvsnprintf, (PCHAR buf, size_t size, PCCHAR fmt, va_list args))
+XAL_METHOD(INT,  ksnprintf,  (PCHAR buf, size_t size, PCCHAR fmt, ...))
+XAL_METHOD(VOID, printk,     (PCCHAR fmt, ...))
+
+/* --- String --- */
+XAL_METHOD(INT,    StrCmp,    (PCCHAR S1, PCCHAR S2))
+XAL_METHOD(UINT32, AtoI,      (PCCHAR Str))
+XAL_METHOD(VOID,   ItoA,      (INT n, PCHAR Str))
+XAL_METHOD(PCHAR,  StrCat,    (PCHAR Dest, PCCHAR Src))
+XAL_METHOD(PCHAR,  StrnCat,   (PCHAR Dest, PCCHAR Src, SIZE_T N))
+XAL_METHOD(PCHAR,  StrCpy,    (PCHAR Dest, PCCHAR Src))
+XAL_METHOD(PCHAR,  StrChr,    (PCCHAR srt, INT C))
+XAL_METHOD(PCHAR,  StrDup,    (PCCHAR Str))
+XAL_METHOD(SIZE_T, StrLen,    (PCCHAR Str))
+XAL_METHOD(INT,    StrnCmp,   (PCCHAR S1, PCCHAR S2, SIZE_T N))
+XAL_METHOD(PCHAR,  StrnCpy,   (PCHAR Dest, PCCHAR Src, SIZE_T N))
+XAL_METHOD(SIZE_T, StrnLen,   (PCCHAR s, SIZE_T maxLen))
+XAL_METHOD(PCHAR,  StrChrNul, (PCCHAR s, INT C))
+XAL_METHOD(PCHAR,  StrChr,    (PCCHAR s, INT C))
+XAL_METHOD(PCHAR,  StrRChr,   (PCCHAR S, INT C))
+XAL_METHOD(PCHAR,  StrnDup,   (PCCHAR s, SIZE_T N))
+XAL_METHOD(PVOID, MemSet,     (PVOID Dest, INT val, SIZE_T Len))
+XAL_METHOD(PVOID, MemCpy,     (PVOID Dest, PCVOID Src, SIZE_T Len))
+XAL_METHOD(INT,   MemCmp,     (PCVOID S1, PCVOID S2, SIZE_T N))
+XAL_METHOD(PVOID, MemMove,    (PVOID Dest, PCVOID Src, SIZE_T N))
+XAL_METHOD(PVOID, MemChr,     (PCVOID Str, INT C, SIZE_T N))

@@ -23,8 +23,7 @@
 #define XSCOPE_MAX_NODES 64   /* subsystem count, not a hot-path limit. Bump freely if it's ever actually hit */
 
 /* --- Includes ---*/
-#include <Lib/PrintK.H>
-#include <Lib/String.H>
+#include <Lib/Lib.H>
 #include <XAL/XScope.H>
 /* --- Typedefs - Structs - Enums ---*/
 

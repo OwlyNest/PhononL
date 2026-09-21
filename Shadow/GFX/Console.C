@@ -22,8 +22,8 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
-#include <GFX/FB.H>
-#include <Lib/String.H>
+#include <GFX/GFX.H>
+#include <Lib/Lib.H>
 #include <GFX/Console.H>
 
 /* --- Typedefs - Structs - Enums ---*/
@@ -186,13 +186,10 @@ VOID ConsoleRedraw(VOID) {
         UINT32 y = (UINT32)(r * CHAR_H);
 
         /* clear just this character row */
-        gfx_fill_rect(&fb.Back,
-                      0, y,
-                      fb.Back.Width, CHAR_H,
-                      CONSOLE_BG);
+        GfxFillRect(&fb.Back, 0, y, fb.Back.Width, CHAR_H, CONSOLE_BG);
 
         if (ConsoleBuf[r][0] != '\0') {
-            gfx_draw_string(&fb.Back, 0, y, ConsoleBuf[r], CONSOLE_FG);
+            GfxDrawString(&fb.Back, 0, y, ConsoleBuf[r], CONSOLE_FG);
         }
     }
 

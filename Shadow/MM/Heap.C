@@ -28,12 +28,8 @@
 #define ALIGN_UP(x, a)   (((x) + ((a) - 1)) & ~((SIZE_T)(a) - 1))
 
 /* --- Includes ---*/
-#include <Lib/PrintK.H>
-#include <Lib/String.H>
-#include <MM/Heap.H>
+#include <Lib/Lib.H>
 #include <MM/MM.H>
-#include <Arch/X64/Paging.H>
-#include <MM/VMM.H>
 #include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/

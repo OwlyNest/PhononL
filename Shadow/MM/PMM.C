@@ -27,7 +27,6 @@
 	* unavailable by default, which is the safe direction to fail in.
 */
 
-#include "Internal/Types.H"
 #define BITMAP_WORD_BITS    64
 #define BITMAP_WORD(Pfn)    ((Pfn) / BITMAP_WORD_BITS)
 #define BITMAP_BIT(Pfn)     ((Pfn) % BITMAP_WORD_BITS)
@@ -40,9 +39,8 @@
 #define LOW_MEMORY_CUTOFF   0x100000ULL 
 
 /* --- Includes ---*/
-#include <Lib/String.H>
+#include <Lib/Lib.H>
 #include <MM/MM.H>
-#include <MM/PMM.H>
 #include <info.h>
 #include <XAL/XScope.H>
 

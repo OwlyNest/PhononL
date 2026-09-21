@@ -11,10 +11,8 @@
  */
 
 /* --- Includes ---*/
-#include <GFX/FB.H>
-#include <GFX/Console.H>
-#include <Lib/String.H>
-#include <Lib/PrintK.H>
+#include <GFX/GFX.H>
+#include <Lib/Lib.H>
 
 #include <stdarg.h>
 
@@ -471,6 +469,6 @@ VOID printk(PCCHAR fmt, ...) {
 		if (ConsoleIsDirty()) {
 			ConsoleRedraw();
 		}
-    	fb_present();
+    	FbPresent();
   	}
 }

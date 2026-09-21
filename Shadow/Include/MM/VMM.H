@@ -23,8 +23,6 @@
 #ifndef __MM_VMM_H__
 #define __MM_VMM_H__
 
-#define MM_VIRT_INVALID ((VIRT_ADDR_T)0)
-
 /* --- Includes ---*/
 #include <MM/MM.H>
 

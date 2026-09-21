@@ -20,7 +20,6 @@
 */
 
 /* --- Macros ---*/
-#include "IAL/IAL.H"
 #define PIC_MASTER_CMD  0x20
 #define PIC_MASTER_DATA 0x21
 #define PIC_SLAVE_CMD   0xA0
@@ -34,7 +33,7 @@
 #define PIC_EOI         0x20
 
 /* --- Includes ---*/
-#include <Arch/X64/IO.H>
+#include <Int/IO.H>
 #include <IAL/PIC.H>
 
 /* --- Typedefs - Structs - Enums ---*/

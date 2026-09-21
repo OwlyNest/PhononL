@@ -37,6 +37,8 @@
 #define HUGE_1G_SIZE       0x40000000ULL
 #define HUGE_2M_SIZE       0x00200000ULL
 
+#define MM_VIRT_INVALID ((VIRT_ADDR_T)0)
+
 /*
 	* Address space layout:
 	* Canonical higher half only. Nothing below 0xFFFF800000000000 belongs to

@@ -1,5 +1,5 @@
 /*
-	* Shadow/Include/Arch/X64/IO.H - Port I/O primitives
+	* Shadow/Include/INT/IO.H - Port I/O primitives
 	* Author:   amity
 	* Date:     Thu Sep 17 23:26:55 2026
 	* Copyright © 2026 OwlyNest
@@ -20,8 +20,8 @@
 */
 
 /* --- Macros ---*/
-#ifndef __ARCH_X64_IO_H__
-#define __ARCH_X64_IO_H__
+#ifndef __INT_IO_H__
+#define __INT_IO_H__
 
 /* --- Includes ---*/
 
@@ -58,4 +58,4 @@ FORCEINLINE VOID IOWait(VOID) {
 }
 
 
-#endif /* __ARCH_X64_IO_H__ */
+#endif /* __INT_IO_H__ */

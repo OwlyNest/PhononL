@@ -1,5 +1,5 @@
 /*
-	* Shadow/Include/Arch/X64/IDT.H - [Enter description]
+	* Shadow/Include/Int/IDT.H - [Enter description]
 	* Author:   amity
 	* Date:     Thu Sep 17 23:39:13 2026
 	* Copyright © 2026 OwlyNest
@@ -20,8 +20,8 @@
 */
 
 /* --- Macros ---*/
-#ifndef __ARCH_X64_IDT_H__
-#define __ARCH_X64_IDT_H__
+#ifndef __INT_IDT_H__
+#define __INT_IDT_H__
 
 #define IDT_ENTRIES 48   /* 32 exceptions + 16 legacy IRQs for now, extend when MSI wants arbitrary vectors */
 
@@ -72,4 +72,4 @@ SHSTATUS IdtRegisterHandler(IN UINT8 Vector, IN INTERRUPT_HANDLER Handler);
 VOID IdtDispatch(IN _PINTERRUPT_FRAME Frame);
  
 
-#endif /* __ARCH_X64_IDT_H__ */
+#endif /* __INT_IDT_H__ */

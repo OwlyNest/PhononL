@@ -1,5 +1,5 @@
 /*
-	* Shadow/Arch/X64/Paging.C - x86_64 4-level page tables
+	* Shadow/MM/Paging.C - x86_64 4-level page tables
 	* Author:   amity
 	* Date:     Wed Sep 16 14:28:58 2026
 	* Copyright © 2026 OwlyNest
@@ -55,10 +55,8 @@
 
 
 /* --- Includes ---*/
-#include <Lib/String.H>
+#include <Lib/Lib.H>
 #include <MM/MM.H>
-#include <Arch/X64/Paging.H>
-#include <MM/PMM.H>
 #include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
