@@ -32,16 +32,4 @@
 
 /* --- Prototypes ---*/
 
-/*
-	* Requires MmInitPaging() to have already switched CR3 -- this grows
-	* through MmAllocateVirtual, which needs a live kernel address space.
-*/
-SHSTATUS ExInitializePool(VOID);
- 
-PVOID ExAllocatePool(IN SIZE_T Bytes);
-PVOID ExAllocatePoolZeroed(IN SIZE_T Bytes);
-VOID  ExFreePool(IN PVOID Ptr);
-BOOLEAN ExPoolReady(VOID);
-
-
 #endif /* __MM_HEAP_H__ */

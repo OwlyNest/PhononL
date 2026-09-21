@@ -78,6 +78,21 @@ VOID KernelMain(
 	}
  
 	MemCpy(&BootInfo, Info, sizeof(PhononBootInfo));
+ 
+	// /* --- Memory --- */
+	// if (MmInitPhysical(&BootInfo) != STATUS_SUCCESS) {
+	// 	printk("[!] Physical memory init failed\n");
+	// 	for (;;) {
+	// 		__asm__ __volatile__("cli\n\thlt");
+	// 	}
+	// }
+ 
+	// if (MmInitPaging() != STATUS_SUCCESS) {
+	// 	printk("[!] Paging init failed\n");
+	// 	for (;;) {
+	// 		__asm__ __volatile__("cli\n\thlt");
+	// 	}
+	// }
 
 	XScopeRun();
  

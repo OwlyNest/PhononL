@@ -168,6 +168,7 @@ if ($Rebuild) {
 
     Write-Host "[x] Building Shadow..."
     Shadow/generate_build_mks.ps1
+    Shadow/Tools/CheckSurface.ps1
     if ($Full) {
         Run "make -C Shadow clean"
         Run "bear -- make -C Shadow -j6"

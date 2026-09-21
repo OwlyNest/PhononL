@@ -26,3 +26,4 @@ compile_commands.json
 .DS_Store
 pushphonon.ps1
 SERIAL.TXT
+OVMF_VARS.fd

@@ -72,7 +72,7 @@
 #define MM_KERNEL_BASE      0xFFFFFFFF80000000ULL
 
 /* --- Includes ---*/
-#include <Internal/Types.H>
+#include <info.h>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -137,6 +137,12 @@ extern UINT8 __BssEnd[];
 extern UINT8 __KernelVmaMarker[];      /* == KERNEL_VMA from Link.ld */
 
 /* --- Prototypes ---*/
+
+#define XAL_EMIT_PROTOTYPES
+#include <XAL/xSCAL.H>
+#include <MM/MM.xal>
+#undef XAL_EMIT_PROTOTYPES
+#undef XAL_METHOD
 
 /*
 	* Valid only once the boot stub's PML4 is live. See the direct map note

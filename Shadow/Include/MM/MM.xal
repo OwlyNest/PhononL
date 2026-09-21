@@ -1,0 +1,55 @@
+/*
+	* Shadow/MM/MM.xal - MM manifest
+	*
+	* xSCAL: PMM, Paging, VMM and Heap are complementary implementations
+	* of ONE subsystem, not four. This is the combined public surface of
+	* all four files together -- everything listed here may be non-static
+	* in PMM.C / Arch/X64/Paging.C / VMM.C / Heap.C; everything NOT listed
+	* here must be static. CheckSurface.ps1 enforces that.
+	*
+	* Cross-file calls within MM (Paging.C calling a PMM.C function, say)
+	* are exactly what "complementary implementations combining into one
+	* abstraction" means -- they are not a leak. The boundary this
+	* protects is GAL, IAL, or anything else outside MM/ ever needing to
+	* know a PTE bit position, a bitmap layout, or a free-list header
+	* shape.
+*/
+
+XAL_META(Class, xSCAL)
+
+/* --- PMM --- */
+XAL_METHOD(SHSTATUS,     MmInitPhysical,         (IN PPhononBootInfo Info))
+XAL_METHOD(PHYS_ADDR_T,  MmAllocatePage,         (VOID))
+XAL_METHOD(PHYS_ADDR_T,  MmAllocatePages,        (IN SIZE_T Count))
+XAL_METHOD(VOID,         MmFreePage,             (IN PHYS_ADDR_T Phys))
+XAL_METHOD(VOID,         MmFreePages,            (IN PHYS_ADDR_T Phys, IN SIZE_T Count))
+XAL_METHOD(VOID,         MmReservePhysicalRange, (IN PHYS_ADDR_T Base, IN SIZE_T Bytes))
+XAL_METHOD(VOID,         MmGetPhysicalStats,     (OUT _PMM_STATS Stats))
+XAL_METHOD(VOID,         MmPmmRebaseToDirectMap, (VOID))
+XAL_METHOD(VOID,         MmReclaimBootServices,  (IN PPhononBootInfo Info))
+
+/* --- Paging (Arch/X64) --- */
+XAL_METHOD(SHSTATUS,           MmInitPaging,              (VOID))
+XAL_METHOD(_PMM_ADDRESS_SPACE, MmGetKernelAddressSpace,   (VOID))
+XAL_METHOD(SHSTATUS,           MmMapPage,                 (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN PHYS_ADDR_T Phys, IN _MM_PROTECTION Prot))
+XAL_METHOD(SHSTATUS,           MmMapHugePage,             (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN PHYS_ADDR_T Phys, IN _MM_PROTECTION Prot))
+XAL_METHOD(VOID,               MmUnmapPage,               (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt))
+XAL_METHOD(PHYS_ADDR_T,        MmGetPhysicalAddress,      (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt))
+XAL_METHOD(VOID,               MmSwitchAddressSpace,      (IN _PMM_ADDRESS_SPACE Space))
+XAL_METHOD(VOID,               MmInvalidatePage,          (IN VIRT_ADDR_T Virt))
+XAL_METHOD(VOID,               MmFlushTlb,                (VOID))
+
+/* --- VMM --- */
+XAL_METHOD(SHSTATUS,    MmMapRange,         (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN PHYS_ADDR_T Phys, IN SIZE_T Bytes, IN _MM_PROTECTION Prot))
+XAL_METHOD(VOID,        MmUnmapRange,       (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN SIZE_T Bytes))
+XAL_METHOD(VIRT_ADDR_T, MmMapIoSpace,       (IN _PMM_ADDRESS_SPACE Space, IN PHYS_ADDR_T Phys, IN SIZE_T Bytes, IN _MM_PROTECTION Prot))
+XAL_METHOD(VOID,        MmUnmapIoSpace,     (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN SIZE_T Bytes))
+XAL_METHOD(VIRT_ADDR_T, MmAllocateVirtual,  (IN _PMM_ADDRESS_SPACE Space, IN SIZE_T Bytes, IN _MM_PROTECTION Prot))
+XAL_METHOD(VOID,        MmFreeVirtual,      (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN SIZE_T Bytes))
+
+/* --- Heap --- */
+XAL_METHOD(SHSTATUS, ExInitializePool,     (VOID))
+XAL_METHOD(PVOID,    ExAllocatePool,       (IN SIZE_T Bytes))
+XAL_METHOD(PVOID,    ExAllocatePoolZeroed, (IN SIZE_T Bytes))
+XAL_METHOD(VOID,     ExFreePool,           (IN PVOID Ptr))
+XAL_METHOD(BOOLEAN,  ExPoolReady,          (VOID))
