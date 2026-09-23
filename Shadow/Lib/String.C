@@ -1,4 +1,4 @@
-#include <MM/Heap.H>
+#include <MM/MM.H>
 #include <Lib/Lib.H>
 
 INT StrCmp(PCCHAR S1, PCCHAR S2) {

@@ -26,6 +26,7 @@
 #include <IAL/IAL.H>
 #include <Int/IDT.H>
 #include <Lib/Lib.H>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 typedef struct IDT_ENTRY {
@@ -210,8 +211,12 @@ VOID IdtInit(VOID) {
 	IdtPointer.Base  = (UINT64)&IdtEntries[0];
  
 	__asm__ __volatile__("lidt %0" :: "m"(IdtPointer));
- 
-	printk("[Idt] Loaded, %u entries, CS=0x%x\n", IDT_ENTRIES, Cs);
+}
+
+SHSTATUS XScopeIdtInit(VOID) {
+	IdtInit();
+
+	return STATUS_SUCCESS;
 }
  
 SHSTATUS IdtRegisterHandler(
@@ -225,3 +230,5 @@ SHSTATUS IdtRegisterHandler(
 	HandlerTable[Vector] = Handler;
 	return STATUS_SUCCESS;
 }
+
+XSCOPENODE(X64_IDT, XScopeIdtInit);

@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/Arch/X64/Paging.H - [Enter description]
+	* Shadow/TAL/TAL.C - Timer Abstraction Layer: dispatch
 	* Author:   amity
-	* Date:     Wed Sep 16 14:29:12 2026
+	* Date:     Wed Sep 23 00:38:50 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,16 +20,26 @@
 */
 
 /* --- Macros ---*/
-#ifndef __ARCH_X64_PAGING_H__
-#define __ARCH_X64_PAGING_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
+#include <TAL/TAL.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
+static _PTAL_BACKEND ActiveBackend = NULL;
 
 /* --- Prototypes ---*/
 
-#endif /* __ARCH_X64_PAGING_H__ */
+/* --- Functions ---*/
+
+#define XAL_PREFIX TAL
+#define XAL_BACKEND _PTAL_BACKEND
+#define XAL_EMIT_DISPATCH
+#include <XAL/xMCAL.H>
+#include <TAL/TAL.xal>
+#undef XAL_EMIT_DISPATCH
+#undef XAL_METHOD
+#undef XAL_METHOD_VOID
+#undef XAL_PREFIX
+#undef XAL_BACKEND

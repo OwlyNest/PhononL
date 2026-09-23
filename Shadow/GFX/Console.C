@@ -25,11 +25,14 @@
 #include <GFX/GFX.H>
 #include <Lib/Lib.H>
 #include <GFX/Console.H>
+#include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
-static CHAR  ConsoleBuf[CONSOLE_ROWS][CONSOLE_COLS + 1];
+static PCHAR ConsoleBuf   =  NULL;
+static INT   ConsoleRows  =  0;
+static INT   ConsoleCols  =  0;
 static INT   ConsoleRow   =  0;
 static INT   ConsoleCol   =  0;
 static INT   ConsoleReady =  0;
@@ -40,10 +43,16 @@ static INT   DirtyBottom  = -1;
 /* --- Prototypes ---*/
 
 /* --- Functions ---*/
+static PCHAR ConsoleRowPtr(
+	IN INT Row
+) {
+	return ConsoleBuf + (SIZE_T)Row * (ConsoleCols + 1);
+}
+
 static VOID MarkDirty(
 	IN INT Row
 ) {
-	if (Row < 0 || Row >= CONSOLE_ROWS) {
+	if (Row < 0 || Row >= ConsoleRows) {
 		return;
 	}
 
@@ -60,16 +69,21 @@ static VOID MarkDirty(
 }
 
 static VOID MarkAllDirty(VOID) {
+	if (ConsoleRows <= 0) {
+		DirtyTop    = -1;
+		DirtyBottom = -1;
+		return;
+	}
 	DirtyTop    = 0;
-	DirtyBottom = CONSOLE_ROWS - 1;
+	DirtyBottom = ConsoleRows - 1;
 }
 
 static VOID ConsoleScroll(VOID) {
-	for (INT r = 0; r < CONSOLE_ROWS - 1; r++) {
-		MemCpy(ConsoleBuf[r], ConsoleBuf[r + 1], CONSOLE_COLS + 1);
+	for (INT r = 0; r < ConsoleRows - 1; r++) {
+		MemCpy(ConsoleRowPtr(r), ConsoleRowPtr(r + 1), ConsoleCols + 1);
 	}
 
-	MemSet(ConsoleBuf[CONSOLE_ROWS - 1], 0, CONSOLE_COLS - 1);
+	MemSet(ConsoleRowPtr(ConsoleRows - 1), 0, ConsoleCols + 1);
 	if (ConsoleRow > 0) {
 		ConsoleRow--;
 	}
@@ -79,14 +93,14 @@ static VOID ConsoleScroll(VOID) {
 
 static VOID ConsoleLineFeed(VOID) {
 	/*
-	 * Oh no, we are not doing the LF Linux thing, Why even HAVE CR
-	 * And besides, I don't like an OS that circumvents my hardware
-	 * And for what? One character less?
+		* Oh no, we are not doing the LF Linux thing, Why even HAVE CR
+		* And besides, I don't like an OS that circumvents my hardware
+		* And for what? One character less?
 	*/
 	ConsoleRow++;
-	if (ConsoleRow >= CONSOLE_ROWS) {
+	if (ConsoleRow >= ConsoleRows) {
 		ConsoleScroll();
-		ConsoleRow = CONSOLE_ROWS - 1;
+		ConsoleRow = ConsoleRows - 1;
 	} else {
 		MarkDirty(ConsoleRow);
 	}
@@ -99,7 +113,8 @@ static VOID ConsoleCarriageReturn(VOID) {
 
 static VOID ConsoleTab(VOID) {
 	ConsoleCol = (ConsoleCol + CONSOLE_DEFAULT_TAB_WIDTH) & ~(CONSOLE_DEFAULT_TAB_WIDTH - 1);
-	if (ConsoleCol >= CONSOLE_COLS) {
+	if (ConsoleCol >= ConsoleCols) {
+		/* "\r\n" */
 		ConsoleCarriageReturn();
 		ConsoleLineFeed();
 	} else {
@@ -124,34 +139,72 @@ static VOID ConsolePutc(CHAR C) {
 		return; /* Oopsie 🦄 */
 	}
 
-	if (ConsoleCol >= CONSOLE_COLS) {
+	if (ConsoleCol >= ConsoleCols) {
 		ConsoleCarriageReturn();
 		ConsoleLineFeed();
 	}
 
-	ConsoleBuf[ConsoleRow][ConsoleCol++] = C;
-	ConsoleBuf[ConsoleRow][ConsoleCol] = '\0';
+	ConsoleRowPtr(ConsoleRow)[ConsoleCol++] = C;
+	ConsoleRowPtr(ConsoleRow)[ConsoleCol] = '\0';
 	MarkDirty(ConsoleRow);	
 }
 
 VOID ConsoleInit(VOID) {
-	MemSet(ConsoleBuf, 0, sizeof(ConsoleBuf));
-	ConsoleRow   = 0;
-	ConsoleCol 	 = 0;
+	UINT32 FbW = 0;
+	UINT32 FbH = 0;
+
+	if (fb.Initialized) {
+		FbW = fb.Back.Width;
+		FbH = fb.Back.Height;
+	}
+
+	ConsoleCols = (INT)(FbW / CHAR_W);
+	ConsoleRows = (INT)(FbH / CHAR_H);
+
+	if (ConsoleCols < 1) {
+		ConsoleCols = CONSOLE_DEFAULT_COLS;
+	}
+	if (ConsoleRows < 1) {
+		ConsoleRows = CONSOLE_DEFAULT_ROWS;
+	}
+
 	/*
-	 * Dirty & Ready... sounds like me, heh!
+		* Drop any previous buffer. ExFreePool is not reliably available yet,
+		* so we just leak on re-init (boot path only calls us once anyway).
 	*/
-	// ConsoleDirty = 1;
+	ConsoleBuf = NULL;
+
+	SIZE_T BufSize = (SIZE_T)ConsoleRows * (ConsoleCols + 1);
+	if (ExPoolReady()) {
+		ConsoleBuf = (CHAR *)ExAllocatePool(BufSize);
+	}
+
+	if (!ConsoleBuf) {
+		ConsoleReady = 0;
+		ConsoleRows  = 0;
+		ConsoleCols  = 0;
+		return;
+	}
+
+	MemSet(ConsoleBuf, 0, BufSize);
+	ConsoleRow   = 0;
+	ConsoleCol   = 0;
+	/*
+	 	* Dirty & Ready... sounds like me, heh!
+	*/
 	ConsoleReady = 1;
 	MarkAllDirty(); /* Has less of a ring to it */
 }
 
 VOID ConsoleClear(VOID) {
 	/*
-	 * See, Kitty devs, It's not that hard
+	 	* See, Kitty devs, It's not that hard
 	*/
+	if (!ConsoleReady || !ConsoleBuf) {
+		return;
+	}
 
-	MemSet(ConsoleBuf, 0, sizeof(ConsoleBuf));
+	MemSet(ConsoleBuf, 0, (SIZE_T)ConsoleRows * (ConsoleCols + 1));
 	ConsoleRow = 0;
 	ConsoleCol = 0;
 	MarkAllDirty();
@@ -160,7 +213,7 @@ VOID ConsoleClear(VOID) {
 VOID ConsoleWrite(
 	IN PCCHAR Str
 ) {
-	if (!ConsoleReady || !Str) {
+	if (!ConsoleReady || !Str || !ConsoleBuf) {
 		return;
 	}
 
@@ -170,31 +223,37 @@ VOID ConsoleWrite(
 }
 
 /*
- * Only touch the dirty row range.
- * For each dirty line we:
- *   1. fill the 8-pixel-high strip with background
- *   2. draw the string
- * That is dramatically cheaper than a full-screen clear on real hardware.
+	* Only touch the dirty row range.
+	* For each dirty line we:
+	*   1. fill the 8-pixel-high strip with background
+	*   2. draw the string
+	* That is dramatically cheaper than a full-screen clear on real hardware.
 */
 VOID ConsoleRedraw(VOID) {
-    if (!ConsoleReady || !fb.Initialized)
-        return;
-    if (DirtyTop < 0)
-        return;                     /* nothing to do */
+	if (!ConsoleReady || !fb.Initialized || !ConsoleBuf) {
+		return;
+	}
+	if (DirtyTop < 0) {
+		return;                     /* nothing to do */
+	}
 
-    for (INT r = DirtyTop; r <= DirtyBottom; r++) {
-        UINT32 y = (UINT32)(r * CHAR_H);
+	for (INT r = DirtyTop; r <= DirtyBottom; r++) {
+		if (r < 0 || r >= ConsoleRows) {
+			continue;
+		}
 
-        /* clear just this character row */
-        GfxFillRect(&fb.Back, 0, y, fb.Back.Width, CHAR_H, CONSOLE_BG);
+		UINT32 y = (UINT32)(r * CHAR_H);
 
-        if (ConsoleBuf[r][0] != '\0') {
-            GfxDrawString(&fb.Back, 0, y, ConsoleBuf[r], CONSOLE_FG);
-        }
-    }
+		/* clear just this character row */
+		GfxFillRect(&fb.Back, 0, y, fb.Back.Width, CHAR_H, CONSOLE_BG);
 
-    DirtyTop    = -1;
-    DirtyBottom = -1;
+		if (ConsoleRowPtr(r)[0] != '\0') {
+			GfxDrawString(&fb.Back, 0, y, ConsoleRowPtr(r), CONSOLE_FG);
+		}
+	}
+
+	DirtyTop    = -1;
+	DirtyBottom = -1;
 }
 
 INT ConsoleIsDirty(VOID) {

@@ -17,6 +17,7 @@ $dirs = @(
     "GFX",
     "GAL",
     "IAL",
+    "TAL",
     "Lib",
     "MM",
     "Int"

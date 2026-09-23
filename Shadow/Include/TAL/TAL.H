@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/PMM.H - [Enter description]
+	* Shadow/Include/TAL/TAL.H - Timer Abstraction Layer
 	* Author:   amity
-	* Date:     Wed Sep 16 09:49:07 2026
+	* Date:     Wed Sep 23 00:32:30 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,16 +20,40 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_PMM_H__
-#define __MM_PMM_H__
+#ifndef __TAL_TAL_H__
+#define __TAL_TAL_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
-#include <info.h>
 
 /* --- Typedefs - Structs - Enums ---*/
+typedef struct TAL_BACKEND _TAL_BACKEND, *_PTAL_BACKEND;
+
+#define XAL_PREFIX TAL
+#define XAL_BACKEND _PTAL_BACKEND
+
+struct TAL_BACKEND {
+	PCCHAR Name;
+	#define XAL_EMIT_STRUCT
+	#include <XAL/xMCAL.H>
+	#include <TAL/TAL.xal>
+	#undef XAL_EMIT_STRUCT
+	#undef XAL_METHOD
+	#undef XAL_METHOD_VOID
+};
+
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-#endif /* __MM_PMM_H__ */
+
+#define XAL_EMIT_PROTOTYPES
+#include <XAL/xMCAL.H>
+#include <TAL/TAL.xal>
+#undef XAL_EMIT_PROTOTYPES
+#undef XAL_METHOD
+#undef XAL_METHOD_VOID
+
+#undef XAL_PREFIX
+#undef XAL_BACKEND
+
+#endif /* __TAL_TAL_H__ */

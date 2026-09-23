@@ -56,20 +56,4 @@ typedef VOID (*INTERRUPT_HANDLER)(IN _PINTERRUPT_FRAME Frame);
 
 /* --- Prototypes ---*/
 
-/*
-	* Builds and loads the IDT. Every vector initially points at a stub
-	* that reports through IdtDefaultFault (exceptions) or is silently
-	* EOI'd (unregistered IRQs). Nothing is left unhandled by default.
-*/
-
-VOID IdtInit(VOID);
- 
-SHSTATUS IdtRegisterHandler(IN UINT8 Vector, IN INTERRUPT_HANDLER Handler);
- 
-/*
-	* Called from Isr.S's common trampoline. Not meant to be called from anywhere else.
-*/
-VOID IdtDispatch(IN _PINTERRUPT_FRAME Frame);
- 
-
 #endif /* __INT_IDT_H__ */

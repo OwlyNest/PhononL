@@ -23,12 +23,12 @@
 #ifndef __GFX_CONSOLE_H__
 #define __GFX_CONSOLE_H__
 
-#define CONSOLE_COLS        80
-#define CONSOLE_ROWS        40
-#define CHAR_W              8
-#define CHAR_H              8
-#define CONSOLE_FG          GfxThemeColor(GFX_FG_TEXT)
-#define CONSOLE_BG          GfxThemeColor(GFX_BG_DESKTOP)
+#define CONSOLE_DEFAULT_COLS      80
+#define CONSOLE_DEFAULT_ROWS      40
+#define CHAR_W                    	8
+#define CHAR_H                    8
+#define CONSOLE_FG                GfxThemeColor(GFX_FG_TEXT)
+#define CONSOLE_BG                GfxThemeColor(GFX_BG_DESKTOP)
 
 #define CONSOLE_DEFAULT_TAB_WIDTH 4
 

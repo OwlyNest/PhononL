@@ -81,6 +81,7 @@ SRC_DIRS := \
     XAL \
     GAL \
     IAL \
+    TAL \
     GFX \
     Lib \
     MM \

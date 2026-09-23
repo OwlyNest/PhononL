@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/Arch/X64/Paging.H - [Enter description]
+	* Shadow/Include/TAL/PIT.H - [Enter description]
 	* Author:   amity
-	* Date:     Wed Sep 16 14:29:12 2026
+	* Date:     Wed Sep 23 00:48:22 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,16 +20,13 @@
 */
 
 /* --- Macros ---*/
-#ifndef __ARCH_X64_PAGING_H__
-#define __ARCH_X64_PAGING_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
+#include <TAL/TAL.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-
-#endif /* __ARCH_X64_PAGING_H__ */
+_PTAL_BACKEND TalPitBackend(VOID);

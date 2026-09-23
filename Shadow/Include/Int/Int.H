@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/MM/Heap.H - Kernel pool allocator
+	* Shadow/Include/Int/Int.H - [Enter description]
 	* Author:   amity
-	* Date:     Thu Sep 17 08:52:50 2026
+	* Date:     Tue Sep 22 14:36:41 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,16 +20,22 @@
 */
 
 /* --- Macros ---*/
-#ifndef __MM_HEAP_H__
-#define __MM_HEAP_H__
+#ifndef __INT_INT_H__
+#define __INT_INT_H__
 
 /* --- Includes ---*/
-#include <MM/MM.H>
+#include <Int/IDT.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
+#define XAL_EMIT_PROTOTYPES
+#include <XAL/xSCAL.H>
+#include <Int/Int.xal>
+#undef XAL_EMIT_PROTOTYPES
+#undef XAL_METHOD
 
-#endif /* __MM_HEAP_H__ */
+
+#endif /* __INT_INT_H__ */

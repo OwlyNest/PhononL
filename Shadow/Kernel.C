@@ -17,9 +17,11 @@
 #include <XAL/XScope.H>
 #include <MM/MM.H>
 #include <info.h>
-#include <Int/IDT.H>
+#include <Int/Int.H>
 #include <IAL/IAL.H>
 #include <IAL/PIC.H>
+#include <TAL/TAL.H>
+#include <TAL/PIT.H>
  
 /* --- Typedefs - Structs - Enums ---*/
  
@@ -107,8 +109,8 @@ VOID KernelMain(
 		* reachable at its physical address.
 	*/
 	GALSetBackend(GAL_GOPBackend(&BootInfo));
-	ConsoleInit();
 	FbInit();
+	ConsoleInit();
  
 	printk("Shadow\r\n");
 	printk("[x] Boot info v%u, framebuffer %ux%u\r\n",
@@ -125,18 +127,19 @@ VOID KernelMain(
 		printk("[x] Heap Heap Hooray!\r\n");
 	}
 
-	IdtInit();
-
 	IALSetBackend(IALPicBackend());
 	if (IALInit() != 0) {
-        printk("[!] IAL backend '%a' failed to initialize\n", IALBackendName());
+        printk("[!] IAL backend '%s' failed to initialize\r\n", IALBackendName());
         for (;;) { __asm__ __volatile__("cli\n\thlt"); }
     }
-    printk("[Ial] Backend: %a\n", IALBackendName());
+    printk("[Ial] Backend: %s\r\n", IALBackendName());
 
     __asm__ __volatile__("sti");
 
+	TALSetBackend(TalPitBackend());
+	TALInit();
+	TALSetFrequency(1000);
+
 	for (;;) {
-		__asm__ __volatile__("hlt");
 	}
 }

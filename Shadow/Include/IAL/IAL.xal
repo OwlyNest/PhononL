@@ -26,7 +26,13 @@ XAL_METHOD_VOID(DisableIrq,
     (IN UINT8 Irq),
     (ActiveBackend, Irq))
 
+
 XAL_METHOD_VOID(SendEoi,
     (_PIAL_BACKEND Self, IN UINT8 Vector),
     (IN UINT8 Vector),
     (ActiveBackend, Vector))
+
+XAL_METHOD_VOID(Disable,
+    (_PIAL_BACKEND Self),
+    (VOID),
+    (ActiveBackend))

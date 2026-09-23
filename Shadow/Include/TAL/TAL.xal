@@ -1,0 +1,55 @@
+/*
+	* Shadow/Include/TAL/TAL.xal - TAL manifest
+	*
+	* xMCAL: PIT today; Local APIC timer and HPET are real future
+	* alternatives, chosen by probe/config, not compile-time. Depends on
+	* IAL because the PIT backend's interrupts ride on whichever
+	* interrupt controller IAL currently has active (PIC's IRQ0), a
+	* future Local APIC timer backend would be self-vectored instead,
+	* which is exactly why GetVector is a method here rather than
+	* something callers derive from IAL themselves.
+*/
+
+XAL_META(Class,   xMCAL)
+XAL_META(Depends, IAL)
+
+XAL_METHOD(INT, Init,
+	(IN _PTAL_BACKEND Self),
+	(VOID),
+	(ActiveBackend),
+	-1)
+
+/*
+	* Requested rate in, actually achieved rate out, PIT's divisor is
+	* an integer (1193182 / Hz), so most requested rates aren't landed on
+	* exactly. Callers use the real value, not the one they asked for.
+	* 0 means "failed to arm" (e.g. Hz out of range for this backend).
+*/
+XAL_METHOD(UINT32, SetFrequency,
+	(IN _PTAL_BACKEND Self, IN UINT32 DesiredHz),
+	(IN UINT32 DesiredHz),
+	(ActiveBackend, DesiredHz),
+	0)
+
+XAL_METHOD_VOID(Stop,
+	(IN _PTAL_BACKEND Self),
+	(VOID),
+	(ActiveBackend))
+
+/*
+	* Which vector this backend's ticks land on, PIC-routed PIT and a
+	* self-vectored APIC timer answer this completely differently, which
+	* is exactly the technical detail callers shouldn't need to know.
+	* 0xFF means "not armed / no vector assigned yet."
+*/
+XAL_METHOD(UINT8, GetVector,
+	(IN _PTAL_BACKEND Self),
+	(VOID),
+	(ActiveBackend),
+	0xFF)
+
+XAL_METHOD(UINT64, GetTicks,
+	(IN _PTAL_BACKEND Self),
+	(VOID),
+	(ActiveBackend),
+	-1) // I don't know really

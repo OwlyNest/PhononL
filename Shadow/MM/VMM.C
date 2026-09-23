@@ -32,8 +32,6 @@
 /* --- Includes ---*/
 #include <MM/MM.H>
 #include <XAL/XScope.H>
-#include <MM/VMM.H>
-
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
