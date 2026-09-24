@@ -139,11 +139,19 @@ if ($Rebuild) {
     Write-Host "[x] Counting Source Lines..."
 
     $lines_total = Measure-Lines `
-        -Extensions @(".c", ".c3", ".h", ".S")
+        -Extensions @(".C", ".C3", ".H", ".S", ".ASM")
 
     $lines_phonon = Measure-Lines `
-        -Extensions @(".c", ".c3", ".h", ".S") `
+        -Extensions @(".C", ".C3", ".H", ".S", ".ASM") `
         -Exclude @("/Build/", "/third_party/acpica/", "/out/")
+
+    $lines_boot = Measure-Lines `
+        -Extensions @(".C", ".C3", ".H", ".S", ".ASM") `
+        -Path @("PhononPkg")
+    
+    $lines_shadow = Measure-Lines `
+        -Extensions @(".C", ".C3", ".H", ".S", ".ASM") `
+        -Path @("Shadow")
 
     if ($Full) {
         Write-Host "[x] Cleaning previous build..."
@@ -158,8 +166,10 @@ if ($Rebuild) {
         Run "build -a $Arch -t $Toolchain -p PhononPkg/PhononPkg.dsc"
     }
 
-    Write-Host "[x] Source lines: $lines_total"
-    Write-Host "[x] Phonon lines: $lines_phonon"
+    Write-Host "[x] Source     lines: $lines_total"
+    Write-Host "[x] Phonon     lines: $lines_phonon"
+    Write-Host "[x] Bootloader lines: $lines_boot"
+    Write-Host "[x] Shadow     lines: $lines_shadow"
 
     $EfiOut = "Build/Phonon/DEBUG_$Toolchain/$Arch/PhononBoot.efi"
     if (!(Test-Path $EfiOut)) {

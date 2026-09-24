@@ -141,5 +141,8 @@ VOID KernelMain(
 	TALSetFrequency(1000);
 
 	for (;;) {
+		if (TALGetTicks() % 1000 == 0) {
+			printk("seconds\r\n");
+		}
 	}
 }

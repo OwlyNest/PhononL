@@ -23,6 +23,7 @@
 
 // Each define here is for a specific flag in the descriptor.
 // Refer to the intel documentation for a description of what each one does.
+#include "Internal/Types.H"
 #define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)
 #define SEG_PRES(x)      ((x) << 0x07) // Present
 #define SEG_SAVL(x)      ((x) << 0x0C) // Available for system use
@@ -47,6 +48,9 @@
 #define SEG_CODE_EXCA      0x0D // Execute-Only, conforming, accessed
 #define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
 #define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
+
+#define IST_STACK_PAGES  4                  /* 16 KiB per IST stack */
+#define IST_STACK_SIZE   (IST_STACK_PAGES * PAGE_SIZE)
  
 #define GDT_CODE_PL0 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
                      SEG_LONG(1)     | SEG_SIZE(0) | SEG_GRAN(1) | \
@@ -66,34 +70,50 @@
 
 /* --- Includes ---*/
 #include <XAL/XScope.H>
+#include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
+typedef UINT64 _GdtDesc, *_PGdtDesc;
 
-/* --- Globals ---*/
-static UINT64 Gdt[3];
-
-struct GdtPtr {
+typedef struct GdtPtr {
 	UINT16 Limit;
 	UINT64 Base;
-} __attribute__((packed));
+} __attribute__((packed)) _GdtPtr, *_PGdtPtr;
 
-static struct GdtPtr gp;
+typedef struct TSS {
+	UINT32 Reserved0;
+	UINT64 Rsp[3];        /* RSP0-2: used on privilege stack switches */
+	UINT64 Reserved1;
+	UINT64 Ist[7];        /* IST1-7: indexed 1-7, Ist[0] ignored */
+	UINT64 Reserved2;
+	UINT16 Reserved3;
+	UINT16 IoMapBase;     /* no IOPB yet: set to sizeof(TSS) */
+} __attribute__((packed)) _TSS, *_PTSS; /* Might not be the best name, oh well */
+C_ASSERT(sizeof(_TSS) == 104);
+/* --- Globals ---*/
+
+static _GdtDesc Gdt[7];
+static _TSS KernelTss;
+static _GdtPtr gp;
+
+static VIRT_ADDR_T NmiStack;
+static VIRT_ADDR_T DfStack;
 
 /* --- Prototypes ---*/
 
 /* --- Functions ---*/
 
-UINT64 CreateDescriptor(
+_GdtDesc CreateDescriptor(
 	IN UINT32 Base,
 	IN UINT32 Limit,
 	IN UINT16 Flag
 ) {
-    UINT64 Descriptor;
+    _GdtDesc Descriptor;
  
     // Create the high 32 bit segment
     Descriptor  =  Limit       & 0x000F0000;         // set limit bits 19:16
     Descriptor |= (Flag <<  8) & 0x00F0FF00;         // set type, p, dpl, s, g, d/b, l and avl fields
-    Descriptor |= (Base >> 16) & 0x000000FF;         // set base bits 23:16
+    Descriptor |= (Base & 0xFFFFFF) << 16;            // set base bits 23:16
     Descriptor |=  Base        & 0xFF000000;         // set base bits 31:24
  
     // Shift by 32 to allow for low part of segment
@@ -106,18 +126,64 @@ UINT64 CreateDescriptor(
 	return Descriptor;
 }
 
+VOID CreateTssDescriptor(
+	IN UINT64 Base,
+	IN UINT32 Limit,
+	OUT UINT64 *Slot
+) {
+	UINT64 Low  = 0;
+	UINT64 High = 0;
+
+	Low  |= (Limit & 0xFFFF);
+		Low  |= (Base & 0xFFFFFF) << 16;   /* base bits 23:0 into bits 39:16 */
+	Low  |= (UINT64)0x9 << 40;   /* type: 64-bit TSS, available */
+	Low  |= (UINT64)1 << 47;     /* present */
+	Low  |= (UINT64)((Limit >> 16) & 0xF) << 48;
+	Low  |= (UINT64)((Base >> 24) & 0xFF) << 56;
+	High |= (Base >> 32);       /* base bits 63:32 live in the high qword */
+
+	Slot[0] = Low;
+	Slot[1] = High;
+}
+
+VOID TssInit(VOID) {
+	CreateTssDescriptor((UINT64)&KernelTss, sizeof(KernelTss) - 1, &Gdt[5]);
+
+	NmiStack = MmAllocateVirtual(MmGetKernelAddressSpace(), IST_STACK_SIZE, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE));
+	DfStack  = MmAllocateVirtual(MmGetKernelAddressSpace(), IST_STACK_SIZE, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE));
+
+		if (NmiStack == MM_VIRT_INVALID || DfStack == MM_VIRT_INVALID) {
+		/*
+			* A gate pointing at an IST slot whose stack was never
+			* allocated is worse than no IST at all: delivery faults,
+			* and on #DF that means triple fault.
+		*/
+
+		for (;;) {
+			__asm__ __volatile__("cli\n\thlt");
+		}
+	}
+
+	KernelTss.IoMapBase = sizeof(KernelTss);
+	KernelTss.Ist[0] = (UINT64)NmiStack + IST_STACK_SIZE;  /* IST1: NMI */
+	KernelTss.Ist[1] = (UINT64)DfStack  + IST_STACK_SIZE;  /* IST2: #DF */
+}
+
 VOID GdtInit(VOID) {
-	Gdt[0] = CreateDescriptor(0, 0x00000000, 0);            // Null  	 Descriptor
+	Gdt[0] = CreateDescriptor(0, 0x00000000, 0);            // Null   Descriptor
 	Gdt[1] = CreateDescriptor(0, 0x000FFFFF, GDT_CODE_PL0); // Kernel Code
 	Gdt[2] = CreateDescriptor(0, 0x000FFFFF, GDT_DATA_PL0); // Kernel Data
-	// Gdt[3] = CreateDescriptor(0, 0x000FFFFF, GDT_CODE_PL3); // User   Code
-	// Gdt[4] = CreateDescriptor(0, 0x000FFFFF, GDT_DATA_PL3); // User   Data
+	Gdt[3] = CreateDescriptor(0, 0x000FFFFF, GDT_CODE_PL3); // User   Code
+	Gdt[4] = CreateDescriptor(0, 0x000FFFFF, GDT_DATA_PL3); // User   Data
+
+	TssInit();
 
 	gp.Limit = sizeof(Gdt) - 1;
 	gp.Base = (UINT64)&Gdt;
 
-	extern VOID GdtFlush(CONST struct GdtPtr *gdt);
+	extern VOID GdtFlush(CONST _PGdtPtr gdt);
 	GdtFlush(&gp);
+	__asm__ __volatile__("ltr %w0" :: "r"((UINT16)0x28) : "memory");
 }
 
 static SHSTATUS XScopeGdtInit(VOID) {
@@ -126,4 +192,4 @@ static SHSTATUS XScopeGdtInit(VOID) {
 	return STATUS_SUCCESS;
 }
 
-XSCOPENODE(X64_GDT, XScopeGdtInit);
+XSCOPENODE(X64_GDT, XScopeGdtInit, "MM_VMM");

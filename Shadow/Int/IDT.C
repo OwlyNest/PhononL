@@ -21,6 +21,7 @@
 
 /* --- Macros ---*/
 #define IDT_GATE_INTERRUPT 0x8E   /* present | dpl0 | 64-bit interrupt gate */
+#define GDT_KERNEL_CS      0x08
 
 /* --- Includes ---*/
 #include <IAL/IAL.H>
@@ -90,28 +91,10 @@ static PCCHAR FaultNames[32] = {
 	"Security Exception",
 };
 /* --- Prototypes ---*/
-static UINT16 IdtGetCs(VOID);
 static VOID   IdtSetGate(IN UINT8 Vector, IN UINT64 Handler, IN UINT16 Selector, IN UINT8 TypeAttr);
 static VOID   IdtDefaultFault(IN _PINTERRUPT_FRAME Frame);
 
 /* --- Functions ---*/
-
-/* ==========================================================================
- * Selector: read, not assumed
- *
- * Shadow has no GDT of its own yet; every register dump this whole
- * project has produced shows CS still pointing at firmware's original
- * descriptor, and that remains true here (GDTR was never reloaded).
- * Reading it live rather than hardcoding 0x38 means this keeps working
- * unmodified the day a real GDT replaces firmware's, instead of being a
- * value that was only ever correct by observation.
- * ======================================================================= */
-
-static UINT16 IdtGetCs(VOID) {
-	UINT16 Cs;
-	__asm__ __volatile__("movw %%cs, %0" : "=r"(Cs));
-	return Cs;
-}
 
 static VOID IdtSetGate(
 	IN UINT8  Vector,
@@ -123,7 +106,6 @@ static VOID IdtSetGate(
 
 	Entry->OffsetLow = (UINT16)(Handler & 0xFFFF);
 	Entry->Selector  = Selector;
-	Entry->Ist       = 0;
 	/*
 		* No IST stacks yet; see the note
 		* this is heading toward once #DF/#NMI
@@ -200,12 +182,14 @@ VOID IdtDispatch(
  * ======================================================================= */
 
 VOID IdtInit(VOID) {
-	UINT16 Cs = IdtGetCs();
  
 	for (UINT32 v = 0; v < IDT_ENTRIES; v++) {
-		IdtSetGate((UINT8)v, IsrStubTable[v], Cs, IDT_GATE_INTERRUPT);
+		IdtSetGate((UINT8)v, IsrStubTable[v], GDT_KERNEL_CS, IDT_GATE_INTERRUPT);
 		HandlerTable[v] = NULL;
 	}
+
+	IdtEntries[2].Ist = 1;   /* NMI -> IST1 */
+	IdtEntries[8].Ist = 2;   /* #DF -> IST2 */
  
 	IdtPointer.Limit = sizeof(IdtEntries) - 1;
 	IdtPointer.Base  = (UINT64)&IdtEntries[0];
@@ -231,4 +215,4 @@ SHSTATUS IdtRegisterHandler(
 	return STATUS_SUCCESS;
 }
 
-XSCOPENODE(X64_IDT, XScopeIdtInit);
+XSCOPENODE(X64_IDT, XScopeIdtInit, "X64_GDT");
