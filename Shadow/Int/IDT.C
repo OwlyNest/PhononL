@@ -131,13 +131,13 @@ static VOID IdtDefaultFault(
 ) {
 	UINT64 Cr2 = 0;
 
-	printk("\n[!] %a (vector %lu, error 0x%lx)\n", FaultNames[Frame->Vector], Frame->Vector, Frame->ErrorCode);
-	printk("[!] RIP=0x%lx CS=0x%lx RFLAGS=0x%lx\n", Frame->Rip, Frame->Cs, Frame->Rflags);
+	printk("\n[!] %s (vector %lu, error 0x%lx)\r\n", FaultNames[Frame->Vector], Frame->Vector, Frame->ErrorCode);
+	printk("[!] RIP=0x%lx CS=0x%lx RFLAGS=0x%lx\r\n", Frame->Rip, Frame->Cs, Frame->Rflags);
 
 		if (Frame->Vector == 14) { /* Page Fault */
 		__asm__ __volatile__("movq %%cr2, %0" : "=r"(Cr2));
 
-		printk("[!] CR2=0x%lx (%a, %a, %a)\n", Cr2, (Frame->ErrorCode & 1) ? "protection violation" : "not present", (Frame->ErrorCode & 2) ? "write" : "read", (Frame->ErrorCode & 4) ? "user-mode" : "kernel-mode");
+		printk("[!] CR2=0x%lx (%s, %s, %s)\r\n", Cr2, (Frame->ErrorCode & 1) ? "protection violation" : "not present", (Frame->ErrorCode & 2) ? "write" : "read", (Frame->ErrorCode & 4) ? "user-mode" : "kernel-mode");
 	}
 
 	for (;;) {

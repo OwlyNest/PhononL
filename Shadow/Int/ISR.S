@@ -21,7 +21,7 @@
 .macro ISR_NOERR num
 .globl Isr\num
 Isr\num:
-    push $0
+    push $0xB00B # hehe
     push $\num
     jmp IsrCommon
 .endm

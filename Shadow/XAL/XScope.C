@@ -91,10 +91,10 @@ VOID XScopeRun(VOID) {
 				continue;
 			}
 
-			printk("[XScope] %a...\n", Node->Name);
+			printk("[XScope] %s...\r\n", Node->Name);
  
 			if (Node->Init() != STATUS_SUCCESS) {
-				printk("[XScope] %a failed to initialize, halting\n", Node->Name);
+				printk("[XScope] %s failed to initialize, halting\r\n", Node->Name);
 				for (;;) { __asm__ __volatile__("cli\n\thlt"); }
 			}
  
@@ -112,15 +112,15 @@ VOID XScopeRun(VOID) {
 				* Pointing at which one is "the" problem would be a guess.
 			*/
 
-			printk("[XScope] Stuck: unresolved dependency or cycle among:\n");
+			printk("[XScope] Stuck: unresolved dependency or cycle among:\r\n");
 			for (SIZE_T i = 0; i < Count; i++) {
 				if (!Done[i]) {
-					printk("  - %a\n", Nodes[i].Name);
+					printk("  - %s\r\n", Nodes[i].Name);
 				}
 			}
 			for (;;) { __asm__ __volatile__("cli\n\thlt"); }
 		}
 	}
 
-	printk("[XScope] All %lu subsystems initialized\n", (UINT64)Count);
+	printk("[XScope] All %lu subsystems initialized\r\n", (UINT64)Count);
 }

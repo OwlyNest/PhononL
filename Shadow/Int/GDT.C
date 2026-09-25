@@ -135,12 +135,12 @@ VOID CreateTssDescriptor(
 	UINT64 High = 0;
 
 	Low  |= (Limit & 0xFFFF);
-		Low  |= (Base & 0xFFFFFF) << 16;   /* base bits 23:0 into bits 39:16 */
-	Low  |= (UINT64)0x9 << 40;   /* type: 64-bit TSS, available */
-	Low  |= (UINT64)1 << 47;     /* present */
+	Low  |= (Base & 0xFFFFFF) << 16;   /* base bits 23:0 into bits 39:16 */
+	Low  |= (UINT64)0x9 << 40;         /* type: 64-bit TSS, available */
+	Low  |= (UINT64)1 << 47;           /* present */
 	Low  |= (UINT64)((Limit >> 16) & 0xF) << 48;
 	Low  |= (UINT64)((Base >> 24) & 0xFF) << 56;
-	High |= (Base >> 32);       /* base bits 63:32 live in the high qword */
+	High |= (Base >> 32);              /* base bits 63:32 live in the high qword */
 
 	Slot[0] = Low;
 	Slot[1] = High;

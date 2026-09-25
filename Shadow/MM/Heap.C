@@ -208,12 +208,12 @@ VOID ExFreePool(
 	_PHEAP_BLOCK Block = (_PHEAP_BLOCK)((UINT8 *)Ptr - sizeof(_HEAP_BLOCK));
 
 	if (Block->Magic != HEAP_BLOCK_MAGIC) {
-		printk("[Heap] ExFreePool(%p): bad magic -- invalid pointer or heap corruption, refusing to free\n", Ptr);
+		printk("[Heap] ExFreePool(%p): bad magic -- invalid pointer or heap corruption, refusing to free\r\n", Ptr);
 		return;
 	}
 
 	if (Block->Free) {
-		printk("[Heap] ExFreePool(%p): double free\n", Ptr);
+		printk("[Heap] ExFreePool(%p): double free\r\n", Ptr);
 		return;
 	}
 

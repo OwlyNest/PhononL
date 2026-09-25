@@ -82,7 +82,7 @@ int FbInit(void) {
   FBBackOwned = 0;
  
   if (GALInit() != 0) {
-    //printk("[fb] GAL backend '%s' failed to initialize\n", gal_backend_name());
+    printk("[fb] GAL backend '%s' failed to initialize\r\n", GALBackendName());
     return -1;
   }
  
@@ -99,7 +99,7 @@ int FbInit(void) {
  
   fb.Front = (UINT32 *)GALGetFramebuffer();
   if (!fb.Front) {
-    // printk("[fb] GAL backend '%s' has no linear framebuffer\n", GALBackendName());
+    printk("[fb] GAL backend '%s' has no linear framebuffer\r\n", GALBackendName());
     return -1;
   }
  
@@ -131,7 +131,7 @@ int FbInit(void) {
   fb.Back.PitchPx = fb.Back.Width;
  
   fb.Initialized = 1;
-  // printk("[fb] Using GAL backend '%s': %ux%u\n", gal_backend_name(), FbHw.Width, FbHw.Height);
+  printk("[fb] Using GAL backend '%s': %ux%u\r\n", GALBackendName(), FbHw.Width, FbHw.Height);
   return 0;
 }
 

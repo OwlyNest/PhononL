@@ -1,0 +1,75 @@
+{
+    "global_defines": [
+        "__OWLYNEST__"
+    ],
+    "subsystems": [
+        {
+            "dir": "Boot",
+            "macros": [
+                "__BOOT__"
+            ]
+        },
+        {
+            "dir": "XAL",
+            "macros": [
+                "__XAL__"
+            ]
+        },
+        {
+            "dir": "GAL",
+            "macros": [
+                "__GAL__"
+            ]
+        },
+        {
+            "dir": "IAL",
+            "macros": [
+                "__IAL__"
+            ]
+        },
+        {
+            "dir": "TAL",
+            "macros": [
+                "__TAL__"
+            ]
+        },
+        {
+            "dir": "GFX",
+            "macros": [
+                "__GFX__"
+            ]
+        },
+        {
+            "dir": "Lib",
+            "macros": [
+                "__LIB__"
+            ]
+        },
+        {
+            "dir": "MM",
+            "macros": [
+                "__MM__"
+            ]
+        },
+        {
+            "dir": "Int",
+            "macros": [
+                "__INT__"
+            ]
+        },
+        {
+            "dir": "DRV",
+            "macros": [
+                "__DRV__"
+            ],
+            "subdirs": [
+                {
+                    "name": "SERIAL",
+                    "macros": [
+                        "__SERIAL__"
+                    ]
+                }
+            ]
+        }
+    ]
+}

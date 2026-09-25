@@ -31,13 +31,26 @@
 
 /*
 	* What a handler actually receives. Field order matches Isr.S's push
-	* order exactly -- Frame is RSP itself, cast, not a copy. Reordering
+	* order exactly, Frame is RSP itself, cast, not a copy. Reordering
 	* one without the other silently reads garbage.
 */
 
 typedef struct INTERRUPT_FRAME {
-	UINT64 R15, R14, R13, R12, R11, R10, R9, R8;
-	UINT64 Rbp, Rdi, Rsi, Rdx, Rcx, Rbx, Rax;
+	UINT64 R15;
+	UINT64 R14;
+	UINT64 R13;
+	UINT64 R12;
+	UINT64 R11;
+	UINT64 R10;
+	UINT64 R9;
+	UINT64 R8;
+	UINT64 Rbp;
+	UINT64 Rdi;
+	UINT64 Rsi;
+	UINT64 Rdx;
+	UINT64 Rcx;
+	UINT64 Rbx;
+	UINT64 Rax;
  
 	UINT64 Vector;
 	UINT64 ErrorCode;    /* 0 for vectors that don't push a real one */

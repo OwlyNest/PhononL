@@ -1,0 +1,17 @@
+/*
+	* Shadow/Serial/Serial.xal - Serial manifest
+	*
+	* xSCAL: one UART, no backends -- QEMU's -serial stdio emulates the
+	* same 16550 a real machine would have, not a QEMU-specific stand-in,
+	* so there's no second implementation to abstract across. SerialInit's
+	* own loopback self-test is what handles "maybe this hardware doesn't
+	* have one," not a second .xal-declared backend.
+	*
+	* No Depends line: pure port I/O, needs nothing else up first. This
+	* can be the very first XSCOPENODE the kernel runs.
+*/
+
+XAL_META(Class,  xSCAL)
+
+XAL_METHOD(SHSTATUS, SerialInit,       (VOID))
+XAL_METHOD(VOID,     SerialWriteByte,  (IN UINT8 Byte))

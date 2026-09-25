@@ -77,14 +77,14 @@ VOID KernelMain(
  
 	// /* --- Memory --- */
 	// if (MmInitPhysical(&BootInfo) != STATUS_SUCCESS) {
-	// 	printk("[!] Physical memory init failed\n");
+	// 	printk("[!] Physical memory init failed\r\n");
 	// 	for (;;) {
 	// 		__asm__ __volatile__("cli\n\thlt");
 	// 	}
 	// }
  
 	// if (MmInitPaging() != STATUS_SUCCESS) {
-	// 	printk("[!] Paging init failed\n");
+	// 	printk("[!] Paging init failed\r\n");
 	// 	for (;;) {
 	// 		__asm__ __volatile__("cli\n\thlt");
 	// 	}
