@@ -4,71 +4,36 @@
     ],
     "subsystems": [
         {
-            "dir": "Boot",
-            "macros": [
-                "__BOOT__"
-            ]
+            "dir": "Boot"
         },
         {
-            "dir": "XAL",
-            "macros": [
-                "__XAL__"
-            ]
+            "dir": "XAL"
         },
         {
-            "dir": "GAL",
-            "macros": [
-                "__GAL__"
-            ]
+            "dir": "GAL"
         },
         {
-            "dir": "IAL",
-            "macros": [
-                "__IAL__"
-            ]
+            "dir": "IAL"
         },
         {
-            "dir": "TAL",
-            "macros": [
-                "__TAL__"
-            ]
+            "dir": "TAL"
         },
         {
-            "dir": "GFX",
-            "macros": [
-                "__GFX__"
-            ]
+            "dir": "GFX"
         },
         {
-            "dir": "Lib",
-            "macros": [
-                "__LIB__"
-            ]
+            "dir": "Lib"
         },
         {
-            "dir": "MM",
-            "macros": [
-                "__MM__"
-            ]
+            "dir": "MM"
         },
         {
-            "dir": "Int",
-            "macros": [
-                "__INT__"
-            ]
+            "dir": "Int"
         },
         {
             "dir": "DRV",
-            "macros": [
-                "__DRV__"
-            ],
             "subdirs": [
-                {
-                    "name": "SERIAL",
-                    "macros": [
-                        "__SERIAL__"
-                    ]
-                }
+                "SERIAL"
             ]
         }
     ]

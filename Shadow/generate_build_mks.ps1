@@ -11,17 +11,24 @@ $ErrorActionPreference = "Stop"
 #                                       subdirs (+ own-dir sources)
 #   build/subsystems.mk   top level  -> "-include <dir>/build.mk" for
 #                                       each declared subsystem, plus
-#                                       BUILD_DEFINES from "macros".
+#                                       BUILD_DEFINES.
+#
+# -D macros are NOT declared in the config — they are derived from the
+# directory path, so they can never drift out of sync or collide:
+#   Boot         -> -D__BOOT__
+#   DRV          -> -D__DRV__
+#   DRV/SERIAL   -> -D__DRV_SERIAL__
+# (dir1/common vs dir2/common becomes __DIR1_COMMON__ / __DIR2_COMMON__)
+#
+# Only genuinely global, non-directory defines (like __OWLYNEST__) live
+# in the config's "global_defines".
 #
 # The makefile -includes build/subsystems.mk and has a rule to
 # regenerate it, so it never goes stale.
 #
-# Subsystems may declare subdirectories:
-#   "subdirs": [ "SERIAL" ]                          plain
-#   "subdirs": [ { "name": "SERIAL",
-#                  "macros": [ "__SERIAL__" ] } ]    with defines
-#   "subdirs": [ "auto" ]                            discover all
-#                                                      child dirs
+# Subdirectory styles:
+#   "subdirs": [ "SERIAL" ]   plain
+#   "subdirs": [ "auto" ]     discover every child directory
 # --------------------------------------------------------------------
 
 $root = Join-Path $PSScriptRoot ""
@@ -40,6 +47,14 @@ function Get-RelativePath {
         $root,
         [System.IO.Path]::GetFullPath($Path)
     ).Replace("\", "/")
+}
+
+function Get-DirDefine {
+    # DRV/SERIAL -> __DRV_SERIAL__ — derived, never declared by hand.
+    param([string]$RelDir)
+
+    $flat = ($RelDir -replace "[/\\]", "_").ToUpper()
+    return "-D__${flat}__"
 }
 
 function Get-SourceLines {
@@ -74,37 +89,36 @@ function Write-LeafBuildMk {
 
     $fullDir = Join-Path $root ($RelDir -replace "/", "\")
     if (-not (Test-Path $fullDir)) {
-        Write-Warning "Declared directory '$RelDir' does not exist. Skipping."
+        Write-Warning "Declared directory '$RelDir' does not exist — skipping."
         return
     }
 
     $lines = @(
-        "# Auto-generated build.mk for $RelDir. Do not edit.",
+        "# Auto-generated build.mk for $RelDir — do not edit.",
         "# Regenerate via generate_build_mks.ps1 (config: build_config.json).",
         ""
     ) + (Get-SourceLines $fullDir)
 
     $lines | Set-Content (Join-Path $fullDir "build.mk") -Encoding utf8
-    Write-Host "Generated $RelDir/build.mk"
+    Write-Host "Generated $RelDir/build.mk ($(Get-DirDefine $RelDir))"
 }
 
 function Write-AggregatorBuildMk {
     # A directory that declares "subdirs" gets a build.mk that pulls in
-    # exactly those subdirectories, plus its own direct sources, if any.
-    # $SubDirs entries are objects: @{ Name = ...; Macros = @(...) }.
+    # exactly those subdirectories — plus its own direct sources, if any.
     param(
         [Parameter(Mandatory)][string]$RelDir,
-        [Parameter(Mandatory)][object[]]$SubDirs
+        [Parameter(Mandatory)][string[]]$SubDirs
     )
 
     $fullDir = Join-Path $root ($RelDir -replace "/", "\")
     if (-not (Test-Path $fullDir)) {
-        Write-Warning "Declared directory '$RelDir' does not exist. Skipping."
+        Write-Warning "Declared directory '$RelDir' does not exist — skipping."
         return
     }
 
     $lines = @(
-        "# Auto-generated aggregator for $RelDir. Do not edit.",
+        "# Auto-generated aggregator for $RelDir — do not edit.",
         "# Add/remove subsystems in build_config.json, not here.",
         ""
     )
@@ -116,12 +130,12 @@ function Write-AggregatorBuildMk {
     }
 
     foreach ($sub in $SubDirs) {
-        Write-LeafBuildMk "$RelDir/$($sub.Name)"
-        $lines += "-include $RelDir/$($sub.Name)/build.mk"
+        Write-LeafBuildMk "$RelDir/$sub"
+        $lines += "-include $RelDir/$sub/build.mk"
     }
 
     $lines | Set-Content (Join-Path $fullDir "build.mk") -Encoding utf8
-    Write-Host "Generated $RelDir/build.mk (aggregator)"
+    Write-Host "Generated $RelDir/build.mk (aggregator, $(Get-DirDefine $RelDir))"
 }
 
 # --------------------------------------------------------------------
@@ -137,35 +151,22 @@ foreach ($d in @($config.global_defines)) {
 
 foreach ($sub in $config.subsystems) {
     $dir = $sub.dir
-
-    foreach ($m in @($sub.macros)) {
-        $defines += "-D$m"
-    }
+    $defines += Get-DirDefine $dir
 
     $hasSubdirs = $null -ne $sub.PSObject.Properties["subdirs"] -and $sub.subdirs
 
     if ($hasSubdirs) {
-        $raw = @($sub.subdirs)
+        $subs = @($sub.subdirs)
 
-        if ($raw.Count -eq 1 -and $raw[0] -eq "auto") {
-            # Discover every child directory, nothing to declare by hand.
-            $raw = @(Get-ChildItem (Join-Path $root $dir) -Directory `
+        if ($subs.Count -eq 1 -and $subs[0] -eq "auto") {
+            # Discover every child directory — nothing to declare by hand.
+            $subs = @(Get-ChildItem (Join-Path $root $dir) -Directory `
                         -ErrorAction SilentlyContinue |
                      Sort-Object Name | Select-Object -ExpandProperty Name)
         }
 
-        # Normalise: strings stay plain, objects may carry macros.
-        $subs = @()
-        foreach ($r in $raw) {
-            if ($r -is [string]) {
-                $subs += @{ Name = $r; Macros = @() }
-            }
-            else {
-                $subs += @{ Name = $r.name; Macros = @($r.macros) }
-                foreach ($m in @($r.macros)) {
-                    $defines += "-D$m"
-                }
-            }
+        foreach ($s in $subs) {
+            $defines += Get-DirDefine "$dir/$s"
         }
 
         Write-AggregatorBuildMk -RelDir $dir -SubDirs $subs
@@ -183,7 +184,7 @@ foreach ($sub in $config.subsystems) {
 
 $mk = @(
     "# Auto-generated by generate_build_mks.ps1 from build_config.json.",
-    "# Do not edit; regenerate with generate_build_mks.ps1.",
+    "# Do not edit, regenerate with generate_build_mks.ps1.",
     ""
 ) + $includes
 

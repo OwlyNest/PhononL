@@ -218,7 +218,8 @@ VOID ConsoleWrite(
 	}
 
 	while (*Str) {
-		ConsolePutc(*Str++); /* Girls having trouble finding the *-spot */
+		CHAR c = *Str++;
+		ConsolePutc(c); /* Girls having trouble finding the *-spot */
 	}
 }
 

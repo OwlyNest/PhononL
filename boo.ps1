@@ -6,6 +6,7 @@ $Rebuild      = $true
 $Full         = $true
 $Arch         = "X64"
 $Toolchain    = "GCC"
+$Short        = "true"
 #$date         = Get-Date -Format yyyy-MM-dd
 
 # Bring in WORKSPACE / PACKAGES_PATH / EDK_TOOLS_PATH / PATH
@@ -26,6 +27,9 @@ for ($i = 0; $i -lt $args.Length; $i++) {
 
 
         "--usb"        { $i++; $UsbDevice = $args[$i] }
+
+        "--long"       { $Short = "false" }
+        "--short"      { $Short = "true" }
     }
 }
 
@@ -180,9 +184,9 @@ if ($Rebuild) {
     Shadow/generate_build_mks.ps1
     if ($Full) {
         Run "make -C Shadow clean"
-        Run "bear -- make -C Shadow -j6"
+        Run "bear -- make -C Shadow SHORT=$Short -j6"
     } else {
-        Run "make -C Shadow -j6"
+        Run "make -C Shadow SHORT=$Short -j6"
     }
 
     $ShadowElf = "Shadow/SHADOW.ELF"

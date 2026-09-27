@@ -14,6 +14,10 @@
 #include <GFX/GFX.H>
 #include <Lib/Lib.H>
 
+#ifdef __DRV_SERIAL__
+#include <DRV/SERIAL/SERIAL.H>
+#endif /* __DRV_SERIAL__ */
+
 #include <stdarg.h>
 
 /* --- Functions ---*/
@@ -463,6 +467,13 @@ VOID printk(PCCHAR fmt, ...) {
 	va_end(args);
 
 	ConsoleWrite(buf);
+	#ifdef __DRV_SERIAL__
+	PCCHAR p = buf;
+	while (*p) {
+		CHAR c = *p++;
+		SerialWriteByte((UINT8)c); /* AGAIN? ✨*/
+	}
+	#endif /* __DRV_SERIAL__ */
 
   	/* Framebuffer presentation belongs to the graphics/UI caller. */
   	if (fb.Initialized) {

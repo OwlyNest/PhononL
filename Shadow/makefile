@@ -26,6 +26,8 @@ endif
 
 TOOLCHAIN := x86_64-elf-
 
+SHORT ?= true
+
 CC       := $(TOOLCHAIN)gcc
 C3       := c3c
 CXX      := $(TOOLCHAIN)g++
@@ -212,8 +214,12 @@ all: $(TARGET)
 # --------------------------------------------------------------------
 
 $(TARGET): $(OBJS) $(LINKER_SCRIPT)
-	@Write-Host "LD  $@"
+ifeq ($(SHORT), true)
+	@$(info LD  $@)
 	@& "$(LD)" $(LDFLAGS) -T $(LINKER_SCRIPT) -o "$@" $(filter-out %.ld,$^) $(LIBS)
+else 
+	$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) -o $@ $(filter-out %.ld,$^) $(LIBS)
+endif
 
 # --------------------------------------------------------------------
 # C
@@ -221,8 +227,12 @@ $(TARGET): $(OBJS) $(LINKER_SCRIPT)
 
 $(BUILD_DIR)/%.o: %.C
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "CC  $<"
+ifeq ($(SHORT), true)
+	@$(info CC  $<)
 	@& "$(CC)" $(CFLAGS) -c "$<" -o "$@"
+else
+	$(CC) $(CFLAGS) -c $< -o $@
+endif
 
 # --------------------------------------------------------------------
 # C3
@@ -230,8 +240,12 @@ $(BUILD_DIR)/%.o: %.C
 
 $(BUILD_DIR)/%.o: %.C3
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "C3  $<"
+ifeq ($(SHORT), true)
+	@$(info C3  $<)
 	@& "$(C3)" compile-only "$<" $(C3FLAGS) --obj-out "$(dir $@)" --emit-only "$(basename $(notdir $<))"
+else
+	$(C3) compile-only $< $(C3FLAGS) --obj-out $(dir $@) --emit-only $(basename $(notdir $<))
+endif
 
 # --------------------------------------------------------------------
 # C++
@@ -239,16 +253,25 @@ $(BUILD_DIR)/%.o: %.C3
 
 $(BUILD_DIR)/%.o: %.CPP
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "CXX $<"
+ifeq ($(SHORT), true)
+	@$(info CXX  $<)
 	@& "$(CXX)" $(CXXFLAGS) -c "$<" -o "$@"
+else
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+endif
 
 # --------------------------------------------------------------------
 # Assembly (NASM)
 # --------------------------------------------------------------------
+
 $(BUILD_DIR)/%.o: %.ASM
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "NASM $<"
+ifeq ($(SHORT), true)
+	@$(info NASM  $<)
 	@& "$(NASM)" $(NASM_FLAGS) "$<" -o "$@"
+else
+	$(NASM) $(NASM_FLAGS) $< -o $@
+endif
 
 # --------------------------------------------------------------------
 # Assembly (GAS)
@@ -256,8 +279,12 @@ $(BUILD_DIR)/%.o: %.ASM
 
 $(BUILD_DIR)/%.o: %.S
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "GAS  $<"
+ifeq ($(SHORT), true)
+	@$(info GAS  $<)
 	@& "$(CC)" $(COMMON_FLAGS) -c "$<" -o "$@"
+else
+	$(CC) $(COMMON_FLAGS) -c $< -o $@
+endif
 
 # --------------------------------------------------------------------
 # Rust
@@ -265,8 +292,12 @@ $(BUILD_DIR)/%.o: %.S
 
 $(BUILD_DIR)/%.o: %.rs
 	@New-Item -ItemType Directory -Force -Path "$(dir $@)" | Out-Null
-	@Write-Host "RS  $<"
+ifeq ($(SHORT), true)
+	@$(info RS  $<)
 	@& "$(RUSTC)" --crate-type lib --emit=obj $(RUSTFLAGS) -o "$@" "$<"
+else
+	$(RUSTC) --crate-type lib --emit=obj $(RUSTFLAGS) -o $@ $<
+endif
 
 # --------------------------------------------------------------------
 # Generated build files — regeneration rule
