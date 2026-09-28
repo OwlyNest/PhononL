@@ -23,18 +23,27 @@
 #ifndef __XAL_XSCOPE_H__
 #define __XAL_XSCOPE_H__
 
+#define XSCOPE_PRIORITY_DEFAULT 0
+#define XSCOPE_PRIORITY_FIRST   (-100)
+
 /* --- Includes ---*/
 #include <XAL/xALCommon.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 typedef SHSTATUS (*XSCOPE_INIT_FN)(VOID);
 
-typedef struct XSCOPE_NODE {
-	PCCHAR Name;
-	PCCHAR const *Depends;
-	SIZE_T DependCount;
-	XSCOPE_INIT_FN Init;
+typedef struct XScopeNode {
+    PCCHAR         Name;
+    INT32          Priority;    /* lower runs first among ready nodes */
+    PCCHAR CONST  *Depends;
+    SIZE_T         DependCount;
+    XSCOPE_INIT_FN Init;
 } _XScopeNode, *_PXScopeNode;
+/*
+	* No packing invariant: the linker-collected section holds POINTERS
+	* to nodes, not nodes, so this layout can never desync the gather.
+*/
+
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
@@ -55,17 +64,23 @@ typedef struct XSCOPE_NODE {
 	* throughout already.
 */
 
-#define XSCOPENODE(NodeName, InitFn, ...)                                  \
+#define XSCOPENODE(NodeName, InitFn, ...) \
+	XSCOPENODE_PRI(NodeName, InitFn, 0, __VA_ARGS__)
+
+#define XSCOPENODE_PRI(NodeName, InitFn, Pri, ...)                          \
 	static PCCHAR CONST XAL_CONCAT(NodeName, _XScopeDepends)[] =            \
 		{ __VA_ARGS__ };                                                    \
-	__attribute__((section(".xscope_nodes"), used))                        \
-	static CONST _XScopeNode XAL_CONCAT(NodeName, _XScopeNode) = {         \
+	static CONST _XScopeNode XAL_CONCAT(NodeName, _XScopeNode) = {          \
 		.Name        = #NodeName,                                           \
+		.Priority    = (Pri),                                               \
 		.Depends     = XAL_CONCAT(NodeName, _XScopeDepends),                \
 		.DependCount = sizeof(XAL_CONCAT(NodeName, _XScopeDepends)) /       \
 					   sizeof(PCCHAR),                                      \
-		.Init        = InitFn,                                             \
-	}
+		.Init        = InitFn,                                              \
+	};                                                                      \
+	__attribute__((section(".xscope_nodes"), used))                        \
+	static CONST _XScopeNode *CONST XAL_CONCAT(NodeName, _XScopeRef) =      \
+		&XAL_CONCAT(NodeName, _XScopeNode)
 
 /*
 	* Runs every registered node in dependency order: repeatedly scans for

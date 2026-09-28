@@ -37,22 +37,27 @@
 	* would discard every one of them as "unused" without it.
 */
 
-extern CONST _XScopeNode __XScopeNodesStart[];
-extern CONST _XScopeNode __XScopeNodesEnd[];
+extern CONST _XScopeNode *CONST __XScopeNodesStart[];
+extern CONST _XScopeNode *CONST __XScopeNodesEnd[];
 
 /* --- Prototypes ---*/
-static BOOLEAN XScopeNameIsDone(IN CONST _XScopeNode *Nodes, IN CONST BOOLEAN *Done, IN SIZE_T Count, IN PCCHAR Name);
+static BOOLEAN XScopeNameIsDone(
+	IN CONST _XScopeNode *CONST *Nodes,
+	IN CONST BOOLEAN *Done,
+	IN SIZE_T Count,
+	IN PCCHAR Name
+);
 
 /* --- Functions ---*/
 
 static BOOLEAN XScopeNameIsDone(
-		IN CONST _XScopeNode *Nodes,
+	IN CONST _XScopeNode *CONST *Nodes,
 	IN CONST BOOLEAN *Done,
 	IN SIZE_T Count,
 	IN PCCHAR Name
 ) {
 	for (SIZE_T i = 0; i < Count; i++) {
-		if (Done[i] && StrCmp(Nodes[i].Name, Name) == 0) {
+		if (Done[i] && StrCmp(Nodes[i]->Name, Name) == 0) {
 			return TRUE;
 		}
 	}
@@ -61,8 +66,29 @@ static BOOLEAN XScopeNameIsDone(
 }
 
 VOID XScopeRun(VOID) {
-	CONST _XScopeNode *Nodes = __XScopeNodesStart;
+	CONST _XScopeNode *CONST *Nodes = __XScopeNodesStart;
 	SIZE_T Count = (SIZE_T)(__XScopeNodesEnd - __XScopeNodesStart);
+
+	if (Count == 0 || Count > XSCOPE_MAX_NODES) {
+		printk("[XScope] node count %lu out of range, halting\r\n",
+			(UINT64)Count);
+		for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+	}
+
+	/*
+	 * Padding between input sections would show up as NULL "entries";
+	 * a bogus gather would show up as NULL Name/Init. Either way the
+	 * failure mode is this message, not a #GP deep in bring-up.
+	 */
+	for (SIZE_T i = 0; i < Count; i++) {
+		if (Nodes[i] == NULL ||
+			Nodes[i]->Name == NULL ||
+			Nodes[i]->Init == NULL) {
+			printk("[XScope] malformed node table at entry %lu, halting\r\n",
+				(UINT64)i);
+			for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+		}
+	}
 
 	BOOLEAN Done[XSCOPE_MAX_NODES];
 	MemSet(Done, 0, sizeof(Done));
@@ -70,14 +96,14 @@ VOID XScopeRun(VOID) {
 	SIZE_T Remaining = Count;
 
 	while (Remaining > 0) {
-		SIZE_T Progress = 0;
+		SIZE_T Best = Count;   /* "none chosen yet" sentinel */
 
 		for (SIZE_T i = 0; i < Count; i++) {
 			if (Done[i]) {
 				continue;
 			}
 
-			CONST _XScopeNode *Node = &Nodes[i];
+			CONST _XScopeNode *Node = Nodes[i];
 			BOOLEAN Ready = TRUE;
 
 			for (SIZE_T d = 0; d < Node->DependCount; d++) {
@@ -91,35 +117,32 @@ VOID XScopeRun(VOID) {
 				continue;
 			}
 
-			printk("[XScope] %s...\r\n", Node->Name);
- 
-			if (Node->Init() != STATUS_SUCCESS) {
-				printk("[XScope] %s failed to initialize, halting\r\n", Node->Name);
-				for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+			/* Among everything ready RIGHT NOW, lowest Priority wins */
+			if (Best == Count || Node->Priority < Nodes[Best]->Priority) {
+				Best = i;
 			}
- 
-			Done[i] = TRUE;
-			Remaining--;
-			Progress++;
 		}
 
-		if (Progress == 0) {
-			/*
-				* Every full pass over the remaining nodes changed nothing:
-				* either a Depends name doesn't match any registered node
-				* (a typo, or the node it names was never linked in), or two
-				* or more nodes depend on each other. Report all of them.
-				* Pointing at which one is "the" problem would be a guess.
-			*/
-
+		if (Best == Count) {
 			printk("[XScope] Stuck: unresolved dependency or cycle among:\r\n");
 			for (SIZE_T i = 0; i < Count; i++) {
 				if (!Done[i]) {
-					printk("  - %s\r\n", Nodes[i].Name);
+					printk("  - %s\r\n", Nodes[i]->Name);
 				}
 			}
 			for (;;) { __asm__ __volatile__("cli\n\thlt"); }
 		}
+
+		CONST _XScopeNode *Node = Nodes[Best];
+		printk("[XScope] %s...\r\n", Node->Name);
+
+		if (Node->Init() != STATUS_SUCCESS) {
+			printk("[XScope] %s failed to initialize, halting\r\n", Node->Name);
+			for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+		}
+
+		Done[Best] = TRUE;
+		Remaining--;
 	}
 
 	printk("[XScope] All %lu subsystems initialized\r\n", (UINT64)Count);

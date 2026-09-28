@@ -33,7 +33,8 @@
         {
             "dir": "DRV",
             "subdirs": [
-                "SERIAL"
+                "SERIAL",
+                "PS2"
             ]
         }
     ]

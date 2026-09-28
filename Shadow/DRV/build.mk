@@ -2,3 +2,4 @@
 # Add/remove subsystems in build_config.json, not here.
 
 -include DRV/SERIAL/build.mk
+-include DRV/PS2/build.mk

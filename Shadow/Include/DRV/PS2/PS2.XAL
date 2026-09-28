@@ -1,0 +1,95 @@
+XAL_META(Class,   xSCAL)
+XAL_META(Depends, IAL)
+XAL_META(Depends, Int)
+
+/* --- What the rest of the kernel calls --- */
+
+/*
+    * Non-blocking: FALSE means "no key event waiting", not an error.
+    * Safe to call from the main loop while the IRQ handler is producing.
+*/
+XAL_METHOD(BOOLEAN, PS2KeyboardRead, (OUT _PPS2_KEY Key))
+
+/*
+    * --- I8042.C -> KBD.C / MOUSE.C ---
+    *
+    * Non-static only because KBD.C and MOUSE.C are different files. Listed
+    * anyway: the rule is "non-static means declared here", with no carve-out
+    * for "but only our own other half calls it". Nothing outside DRV/PS2
+    * has a reason to call these, and KBD.C does no port I/O of its own --
+    * the controller's registers stay inside I8042.C.
+    *
+    * Every primitive below is general over the axes that exist: which
+    * register, which port, and how long to wait. There is deliberately no
+    * flag-based "mode" parameter, a function that needs flags to describe
+    * itself is two functions wearing a trench coat.
+ */
+
+/*
+    * Waits up to Timeout spins for the output buffer, then reads one byte.
+    * Timeout == 0 polls exactly once and never waits, which makes this
+    * safe from IRQ context; the IRQ handler loops on it until FALSE.
+    * Bytes arriving with a parity/timeout error are consumed and reported
+    * FALSE, that is true for every consumer, so it lives in transport.
+    * Does NOT say which port the byte came from: bytes carry no reliable
+    * port tag (status bit 5 is chipset-specific), so that policy belongs
+    * to the caller, not here.
+*/
+XAL_METHOD(BOOLEAN, I8042ReadData, (IN UINT32 Timeout, OUT UINT8 *Byte))
+
+/*
+    * Bounded wait for the input buffer, then write Byte to the data port.
+    * Addresses the PORT1 device directly, or acts as the argument byte of
+    * a two-byte controller command. FALSE on timeout.
+*/
+XAL_METHOD(BOOLEAN, I8042WriteData, (IN UINT8 Byte))
+
+/*
+    * Bounded wait for the input buffer, then write Command to the command
+    * port (0x64). For two-byte commands, use I8042CommandArg. For commands
+    * with a response, follow with I8042ReadData. Together with the
+    * PS2_CMD_* macros this reaches the entire controller command table;
+    * init, self-test (0xAA), interface tests (0xAB/0xA9) and config-byte
+    * access (0x20/0x60) are just call sites of these three, including
+    * inside I8042.C's own bring-up.
+*/
+XAL_METHOD(BOOLEAN, I8042Command,    (IN UINT8 Command))
+XAL_METHOD(BOOLEAN, I8042CommandArg, (IN UINT8 Command, IN UINT8 Arg))
+
+/*
+    * I8042WriteData, routed: port 1 goes to the data port, port 2 is
+    * prefixed with PS2_CMD_SEND_PORT2 (0xD4) so the controller routes it.
+    * The only correct way to address a PORT2 device.
+*/
+XAL_METHOD(BOOLEAN, I8042WriteDevice, (IN UINT8 Port, IN UINT8 Byte))
+
+/*
+    * I8042WriteDevice plus the universal device handshake: waits for ACK
+    * (0xFA), honouring RESEND (0xFE) a bounded number of times. FALSE on
+    * timeout, 0xFC/0xFD error, or an unexpected response byte (consumed).
+    * Device-agnostic, keyboard and mouse share it. Commands whose
+    * response is data (0xF2 identify, 0xFF reset) still need I8042ReadData
+    * for the payload; what the payload means is the device layer's
+    * business.
+*/
+XAL_METHOD(BOOLEAN, I8042DeviceCommand, (IN UINT8 Port, IN UINT8 Byte))
+
+/* Port is 1 or 2. Port 2 is never usable yet: the mouse is deferred. */
+XAL_METHOD(BOOLEAN, I8042PortUsable, (IN UINT8 Port))
+
+/*
+    * Make port N live, in the right order: drain stale output, set the
+    * port's IRQ bit and clear its clock-disable bit in the config byte,
+    * then enable the port at the controller (0xAE / 0xA8). Call this LAST
+    * in a device's bring-up, after its handler is registered. When the
+    * mouse stops being deferred, this one call is its entire PORT2
+    * bring-up.
+*/
+XAL_METHOD(_PS2_Status, I8042EnablePort, (IN UINT8 Port))
+
+/*
+    * Exact inverse of I8042EnablePort: disable at the controller first so
+    * no more bytes arrive, then clear the IRQ bit and set the
+    * clock-disable bit. For failed bring-up and re-init.
+*/
+XAL_METHOD(_PS2_Status, I8042DisablePort, (IN UINT8 Port))

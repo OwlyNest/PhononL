@@ -48,6 +48,7 @@ SECTIONS
         __XScopeNodesStart = .;
         KEEP(*(.xscope_nodes))
         __XScopeNodesEnd = .;
+        __XScopeNodesBytes = ABSOLUTE(__XScopeNodesEnd - __XScopeNodesStart);
     }
 
     .data ALIGN(4K) : AT(ADDR(.data) - KERNEL_VMA) {
