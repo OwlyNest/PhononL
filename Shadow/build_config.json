@@ -22,7 +22,10 @@
             ]
         },
         {
-            "dir": "TAL"
+            "dir": "TAL",
+            "subdirs": [
+                "PIT"
+            ]
         },
         {
             "dir": "GFX"

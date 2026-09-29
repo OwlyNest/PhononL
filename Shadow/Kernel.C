@@ -20,7 +20,6 @@
 #include <Int/Int.H>
 #include <IAL/IAL.H>
 #include <TAL/TAL.H>
-#include <TAL/PIT.H>
  
 /* --- Typedefs - Structs - Enums ---*/
  
@@ -49,20 +48,6 @@ VOID KernelMain(
  
 	MemCpy(&BootInfo, Info, sizeof(PhononBootInfo));
  
-	// /* --- Memory --- */
-	// if (MmInitPhysical(&BootInfo) != STATUS_SUCCESS) {
-	// 	printk("[!] Physical memory init failed\r\n");
-	// 	for (;;) {
-	// 		__asm__ __volatile__("cli\n\thlt");
-	// 	}
-	// }
- 
-	// if (MmInitPaging() != STATUS_SUCCESS) {
-	// 	printk("[!] Paging init failed\r\n");
-	// 	for (;;) {
-	// 		__asm__ __volatile__("cli\n\thlt");
-	// 	}
-	// }
 
 	XScopeRun();
  
@@ -95,8 +80,7 @@ VOID KernelMain(
 		printk("[x] Heap Heap Hooray!\r\n");
 	}
 
-	TALSetBackend(TalPitBackend());
-	TALInit();
+
 	TALSetFrequency(1000);
 
 	_PS2_KEY Event;
@@ -104,7 +88,10 @@ VOID KernelMain(
 	for (;;) {
 
 		if (PS2KeyboardRead(&Event)) {
-			printk("0x%x\r\n", Event.Scancode);
+			printk("0x%02x %s%s\r\n",
+				Event.Scancode,
+				Event.Pressed ? "down" : "up",
+				Event.Extended ? " ext" : "");
 		}
 	}
 }

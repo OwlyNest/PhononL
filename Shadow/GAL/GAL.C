@@ -49,6 +49,11 @@ static _GAL_BACKEND *ActiveBackend = NULL;
 #undef XAL_PREFIX
 #undef XAL_BACKEND
 
+
+/*
+	* This is safe. GCC picks the first. Defined, if GOP and some GPU from AMD are compiled in,
+	* and GOP is at the top, then the init function that uses GOP does not override and the AMD GPU is initialized
+*/
 #ifdef __GAL_GOP__
 static SHSTATUS XScopeGALInit(VOID) {
 	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch * BootInfo.framebuffer_height;

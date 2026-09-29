@@ -1,5 +1,6 @@
-# Auto-generated build.mk for TAL — do not edit.
-# Regenerate via generate_build_mks.ps1 (config: build_config.json).
+# Auto-generated aggregator for TAL — do not edit.
+# Add/remove subsystems in build_config.json, not here.
 
-C_SRCS += TAL/PIT.C
 C_SRCS += TAL/TAL.C
+
+-include TAL/PIT/build.mk

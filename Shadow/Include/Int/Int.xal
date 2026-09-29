@@ -21,3 +21,8 @@ XAL_METHOD(VOID,     IdtDispatch,        (IN _PINTERRUPT_FRAME Frame))
  
 XAL_METHOD(VOID,     GdtInit,            (VOID))
 XAL_METHOD(UINT64,   CreateDescriptor,   (IN UINT32 Base, IN UINT32 Limit, IN UINT16 Flag))
+
+/* --- CPUID --- */
+XAL_METHOD(INT CpuidAvailable(VOID))
+XAL_METHOD(VOID CpuidInit(_PCpuInfo Info))
+XAL_METHOD(VOID CpuidDump(_PCpuInfo Info))

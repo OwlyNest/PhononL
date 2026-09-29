@@ -23,6 +23,8 @@
 
 /* --- Includes ---*/
 #include <TAL/TAL.H>
+#include <TAL/PIT/PIT.H>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -43,3 +45,17 @@ static _PTAL_BACKEND ActiveBackend = NULL;
 #undef XAL_METHOD_VOID
 #undef XAL_PREFIX
 #undef XAL_BACKEND
+
+#ifdef __TAL_PIT__
+static SHSTATUS XScopeTALInit(VOID) {
+	TALSetBackend(TalPitBackend());
+	TALInit();
+	return STATUS_SUCCESS;
+}
+#else
+static SHSTATUS XScopeTALInit(VOID) {
+	return STATUS_SUCCESS; /* Continue without timer */
+}
+#endif
+
+XSCOPENODE(TAL, XScopeTALInit, "X64_IDT", "IAL");

@@ -183,9 +183,9 @@ if ($Rebuild) {
     Write-Host "[x] Building Shadow..."
     if ($Full) {
         Run "make -C Shadow clean"
-        Run "bear -- make -C Shadow SHORT=$Short -j6"
+        Run "bear -- make -C Shadow SHORT=$Short -j"
     } else {
-        Run "make -C Shadow SHORT=$Short -j6"
+        Run "make -C Shadow SHORT=$Short -j"
     }
 
     $ShadowElf = "Shadow/SHADOW.ELF"
