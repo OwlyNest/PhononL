@@ -12,7 +12,6 @@
 /* --- Includes ---*/
 #include <GFX/GFX.H>
 #include <GAL/GAL.H>
-#include <GAL/GOP.H>
 #include <Lib/Lib.H>
 #include <XAL/XScope.H>
 #include <MM/MM.H>
@@ -37,33 +36,8 @@
 PhononBootInfo BootInfo;
  
 /* --- Prototypes ---*/
-static VOID KernelRemapFramebuffer(VOID);
- 
 /* --- Functions ---*/
-static VOID KernelRemapFramebuffer(VOID) {
-	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch * BootInfo.framebuffer_height;
- 
-	/*
-		* Write-combining, not uncached. The firmware hands the GOP surface
-		* over as UC, where every pixel write is a separate bus
-		* transaction -- which is why console output on real hardware
-		* crawls. WC lets the CPU batch them, and needs the PAT slot that
-		* MmInitPaging programmed.
-	*/
 
-	VIRT_ADDR_T FbVirt = MmMapIoSpace(MmGetKernelAddressSpace(), BootInfo.framebuffer_base, FbBytes, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE | MM_PROT_WRITECOMBINE));
- 
-	if (FbVirt == MM_VIRT_INVALID) {
-		/* No framebuffer means no output of any kind from here on. */
-		for (;;) {
-			__asm__ __volatile__("cli\n\thlt");
-		}
-	}
- 
-	GAL_GOPSetVirtualBase(FbVirt);
-	FbUpdateHw();
-}
- 
 VOID KernelMain(
 	IN PPhononBootInfo Info
 ) {
@@ -97,18 +71,12 @@ VOID KernelMain(
 		* it. No printk, no drawing, nothing that touches the framebuffer
 		* until the remap below lands.
 	*/
-	KernelRemapFramebuffer();
 	MmReclaimBootServices(&BootInfo);
 	
 	/* Output is safe again, and now write-combining. */
 	_MM_STATS Stats;
 	MmGetPhysicalStats(&Stats);
 
-
-	/* --- Output, while the identity map still makes the framebuffer
-		* reachable at its physical address.
-	*/
-	GALSetBackend(GAL_GOPBackend(&BootInfo));
 	FbInit();
 	ConsoleInit();
  

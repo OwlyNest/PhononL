@@ -10,7 +10,10 @@
             "dir": "XAL"
         },
         {
-            "dir": "GAL"
+            "dir": "GAL",
+            "subdirs": [
+                "GOP"
+            ]
         },
         {
             "dir": "IAL",

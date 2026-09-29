@@ -22,7 +22,7 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
-#include <GAL/GOP.H>
+#include <GAL/GOP/GOP.H>
 #include <info.h>
 
 /* --- Typedefs - Structs - Enums ---*/
@@ -165,8 +165,8 @@ static VOID GAL_GOPPresent(
 static _GAL_BACKEND GAL_GOP = {
 	.Name = "UEFI Graphics Output Protocol",
 	.Init = GAL_GOPInit,
-	.GetMode = GAL_GOPGetMode,
 	.GetFramebuffer = GAL_GOPGetFrameBuffer,
+	.GetMode = GAL_GOPGetMode,
 	.Present = GAL_GOPPresent,
 };
 

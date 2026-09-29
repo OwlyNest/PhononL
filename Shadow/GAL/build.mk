@@ -1,5 +1,6 @@
-# Auto-generated build.mk for GAL — do not edit.
-# Regenerate via generate_build_mks.ps1 (config: build_config.json).
+# Auto-generated aggregator for GAL — do not edit.
+# Add/remove subsystems in build_config.json, not here.
 
 C_SRCS += GAL/GAL.C
-C_SRCS += GAL/GOP.C
+
+-include GAL/GOP/build.mk

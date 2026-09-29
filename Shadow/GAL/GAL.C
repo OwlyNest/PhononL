@@ -23,10 +23,16 @@
 
 /* --- Includes ---*/
 #include <GAL/GAL.H>
+#include <GAL/GOP/GOP.H>
+#include <info.h>
+#include <MM/MM.H>
+#include <GFX/GFX.H>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
+extern PhononBootInfo BootInfo;
 static _GAL_BACKEND *ActiveBackend = NULL;
 
 /* --- Prototypes ---*/
@@ -42,3 +48,42 @@ static _GAL_BACKEND *ActiveBackend = NULL;
 #undef XAL_METHOD_VOID
 #undef XAL_PREFIX
 #undef XAL_BACKEND
+
+#ifdef __GAL_GOP__
+static SHSTATUS XScopeGALInit(VOID) {
+	SIZE_T FbBytes = (SIZE_T)BootInfo.framebuffer_pitch * BootInfo.framebuffer_height;
+ 
+	/*
+		* Write-combining, not uncached. The firmware hands the GOP surface
+		* over as UC, where every pixel write is a separate bus
+		* transaction -- which is why console output on real hardware
+		* crawls. WC lets the CPU batch them, and needs the PAT slot that
+		* MmInitPaging programmed.
+	*/
+
+	VIRT_ADDR_T FbVirt = MmMapIoSpace(MmGetKernelAddressSpace(), BootInfo.framebuffer_base, FbBytes, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE | MM_PROT_WRITECOMBINE));
+ 
+	if (FbVirt == MM_VIRT_INVALID) {
+		/* No framebuffer means no output of any kind from here on. */
+		for (;;) {
+			__asm__ __volatile__("cli\n\thlt");
+		}
+	}
+ 
+	GAL_GOPSetVirtualBase(FbVirt);
+	FbUpdateHw();
+
+	GALSetBackend(GAL_GOPBackend(&BootInfo));
+	
+
+
+
+	return STATUS_SUCCESS;
+}
+#else 
+static SHSTATUS XScopeGALInit(VOID) {
+	return STATUS_SUCCESS; /* No backend compiled */
+}
+#endif
+
+XSCOPENODE(GAL, XScopeGALInit, "MM_VMM");
