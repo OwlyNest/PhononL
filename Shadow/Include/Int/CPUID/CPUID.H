@@ -61,18 +61,18 @@
 /* --- Includes ---*/
 /* --- Typedefs - Structs - Enums ---*/
 typedef struct {
-    UINT32 leaf;
-    UINT32 subleaf;
+    UINT32 Leaf;
+    UINT32 Subleaf;
 
-    UINT32 eax;
-    UINT32 ebx;
-    UINT32 ecx;
-    UINT32 edx;
+    UINT32 Eax;
+    UINT32 Ebx;
+    UINT32 Ecx;
+    UINT32 Edx;
 } _CpuidRaw, *_PCpuidRaw;
 
 typedef struct {
-    _CpuidRaw entries[CPUID_RAW_MAX];
-    UINT32 count;
+    _CpuidRaw Entries[CPUID_RAW_MAX];
+    UINT32 Count;
 } _CpuidRawDb, *_PCpuidRawDb;
 
 // Leaf 1 feature flags, ECX register.
@@ -178,7 +178,7 @@ typedef enum {
     CPUID_FEAT7_0_EBX_SHA             = 1U << 29,
     CPUID_FEAT7_0_EBX_AVX512BW        = 1U << 30,
     CPUID_FEAT7_0_EBX_AVX512VL        = 1U << 31
- } _CpuidFeat70Ebx, *_PCpuidFeat70Ebx;
+} _CpuidFeat70Ebx, *_PCpuidFeat70Ebx;
 
 // Leaf 7, sub-leaf 0, ECX feature flags.
 typedef enum {
@@ -206,7 +206,7 @@ typedef enum {
     CPUID_FEAT7_0_ECX_ENQCMD          = 1U << 29,
     CPUID_FEAT7_0_ECX_SGX_LC          = 1U << 30,
     CPUID_FEAT7_0_ECX_PKS             = 1U << 31
- } _CpuidFeat70Ecx, *_PCpuidFeat70Ecx;
+} _CpuidFeat70Ecx, *_PCpuidFeat70Ecx;
 
 // Leaf 7, sub-leaf 0, EDX feature flags.
 typedef enum {
@@ -233,7 +233,7 @@ typedef enum {
     CPUID_FEAT7_0_EDX_ARCH_CAPABILITIES= 1U << 29,
     CPUID_FEAT7_0_EDX_CORE_CAPABILITIES = 1U << 30,
     CPUID_FEAT7_0_EDX_SSBD            = 1U << 31
- } _CpuidFeat70Edx, *_PCpuidFeat70Edx;
+} _CpuidFeat70Edx, *_PCpuidFeat70Edx;
 
 // Leaf 0x80000001, ECX extended feature flags.
 typedef enum {
@@ -304,7 +304,7 @@ typedef struct {
     UINT8  Family;
     UINT8  ProcType;
     UINT8  ExtModel;
-    UINT8  Ext_family;
+    UINT8  ExtFamily;
     UINT8  DisplayModel;         // Computed per Intel/AMD rules
     UINT8  DisplayFamily;        // Computed per Intel/AMD rules
     UINT8  BrandIndex;
@@ -326,7 +326,7 @@ typedef struct {
     UINT32 LineSize; // -1
     UINT32 LinePartitions; // -1
     UINT32 Ways; // =1
-    // EDS
+    // EDX
     UINT32 Sets;
     UINT8  Wbinvd;
     UINT8  Inclusive;
@@ -357,185 +357,183 @@ typedef struct {
 // Thermal and power from leaf 6.
 typedef struct {
     // EAX
-    UINT8  digital_temp_sensor;
-    UINT8  turbo_boost;
-    UINT8  arat;
+    UINT8  DigitalTempSensor;
+    UINT8  TurboBoost;
+    UINT8  Arat;
     // reserved
-    UINT8  pln;
-    UINT8  ecmd;
-    UINT8  ptm;
-    UINT8  hwp;
-    UINT8  hwp_n;
-    UINT8  hwp_aw;
-    UINT8  hwp_epp;
-    UINT8  hwp_plr;
+    UINT8  Pln;
+    UINT8  Ecmd;
+    UINT8  Ptm;
+    UINT8  Hwp;
+    UINT8  HwpN;
+    UINT8  HwpAw;
+    UINT8  HwpEpp;
+    UINT8  HwpPlr;
     // reserved
-    UINT8  hdc;
-    UINT8  turbo_boost_max;
-    UINT8  hwp_cap;
-    UINT8  hwp_peci;
-    UINT8  hwp_flex;
-    UINT8  hwp_rfa;
-    UINT8  hwp_feedback;
-    UINT8  hwp_rii;
+    UINT8  Hdc;
+    UINT8  TurboBoostMax;
+    UINT8  HwpCap;
+    UINT8  HwpPeci;
+    UINT8  HwpFlex;
+    UINT8  HwpRfa;
+    UINT8  HwpFeedback;
+    UINT8  HwpRii;
     // reserved
-    UINT8  hwp_control;
-    UINT8  thread_director;
+    UINT8  HwpControl;
+    UINT8  ThreadDirector;
     // EBX
-    UINT32 interrupt_thresholds;
+    UINT32 InterruptThresholds;
     // ECX
-    UINT8  effective_frequency_interface;
-    UINT8  acnt2;
+    UINT8  EffectiveFrequencyInterface;
+    UINT8  Acnt2;
     // reserved
-    UINT8  energy_perf_bias;
-    //reserved
-    UINT32 thread_director_classes;
+    UINT8  EnergyPerfBias;
+    // reserved
+    UINT32 ThreadDirectorClasses;
     // EDX
-    UINT8 performance_capability_reporting;
-    UINT8 efficiency_capability_reporting;
-    UINT32 hardware_feedback_interface_size; // * 4 kiB - 1
-    UINT32 logical_row_idx;
+    UINT8  PerformanceCapabilityReporting;
+    UINT8  EfficiencyCapabilityReporting;
+    UINT32 HardwareFeedbackInterfaceSize; // * 4 kiB - 1
+    UINT32 LogicalRowIdx;
 } _CpuidThermalInfo, *_PCpuidThermalInfo;
 
 // Extended features from leaf 7
 typedef struct {
     /* --- Sub Leaf 0 --- */
     // EBX
-    UINT8 fsgsbase;
-    UINT8 tsc_adjust;
-    UINT8 sgx;
-    UINT8 bmi1;
-    UINT8 hle;
-    UINT8 avx2;
-    UINT8 fdp_excptn_only;
-    UINT8 smep;
-    UINT8 bmi2;
-    UINT8 erms;
-    UINT8 invpcid;
-    UINT8 rtm;
-    UINT8 rdt_m_pqm;
-    UINT8 fcs_fds_deprecation;
-    UINT8 mpx;
-    UINT8 rdt_a_pqe;
-    UINT8 avx512_f;
-    UINT8 avx512_dq;
-    UINT8 rdseed;
-    UINT8 adx;
-    UINT8 smap;
-    UINT8 avx512_ifma;
-    UINT8 pmcommit;
-    UINT8 clflushopt;
-    UINT8 clwb;
-    UINT8 pt;
-    UINT8 avx512_pf;
-    UINT8 avx512_er;;
-    UINT8 avx512_cd;
-    UINT8 sha;
-    UINT8 avx512_bw;
-    UINT8 avx512_vl;
+    UINT8 Fsgsbase;
+    UINT8 TscAdjust;
+    UINT8 Sgx;
+    UINT8 Bmi1;
+    UINT8 Hle;
+    UINT8 Avx2;
+    UINT8 FdpExcptnOnly;
+    UINT8 Smep;
+    UINT8 Bmi2;
+    UINT8 Erms;
+    UINT8 Invpcid;
+    UINT8 Rtm;
+    UINT8 RdtMPqm;
+    UINT8 FcsFdsDeprecation;
+    UINT8 Mpx;
+    UINT8 RdtAPqe;
+    UINT8 Avx512F;
+    UINT8 Avx512Dq;
+    UINT8 Rdseed;
+    UINT8 Adx;
+    UINT8 Smap;
+    UINT8 Avx512Ifma;
+    UINT8 Pmcommit;
+    UINT8 Clflushopt;
+    UINT8 Clwb;
+    UINT8 Pt;
+    UINT8 Avx512Pf;
+    UINT8 Avx512Er;
+    UINT8 Avx512Cd;
+    UINT8 Sha;
+    UINT8 Avx512Bw;
+    UINT8 Avx512Vl;
     // ECX
-    UINT8 prefetchwt1;
-    UINT8 avx512_vbmi;
-    UINT8 umip;
-    UINT8 pku;
-    UINT8 ospke;
-    UINT8 waitpkg;
-    UINT8 avx512_vmbi2;
-    UINT8 cet_ss;
-    UINT8 gfni;
-    UINT8 vaes;
-    UINT8 vpclmulqdq;
-    UINT8 avx512_vnni;
-    UINT8 avx512_bitalg;
-    UINT8 tme_en;
-    UINT8 avx512_vpopcntdq;
-    UINT8 fzm;
-    UINT8 la57;
-    UINT32 mawau;
-    UINT8 rdpid;
-    UINT8 kl;
-    UINT8 bus_lock_detect;
-    UINT8 cldemote;
-    UINT8 mprr;
-    UINT8 movdiri;
-    UINT8 movdir64b;
-    UINT8 enqcmd;
-    UINT8 sgx_lc;
-    UINT8 pks4;
+    UINT8 Prefetchwt1;
+    UINT8 Avx512Vbmi;
+    UINT8 Umip;
+    UINT8 Pku;
+    UINT8 Ospke;
+    UINT8 Waitpkg;
+    UINT8 Avx512Vbmi2;
+    UINT8 CetSs;
+    UINT8 Gfni;
+    UINT8 Vaes;
+    UINT8 Vpclmulqdq;
+    UINT8 Avx512Vnni;
+    UINT8 Avx512Bitalg;
+    UINT8 TmeEn;
+    UINT8 Avx512Vpopcntdq;
+    UINT8 Fzm;
+    UINT8 La57;
+    UINT32 Mawau;
+    UINT8 Rdpid;
+    UINT8 Kl;
+    UINT8 BusLockDetect;
+    UINT8 Cldemote;
+    UINT8 Mprr;
+    UINT8 Movdiri;
+    UINT8 Movdir64b;
+    UINT8 Enqcmd;
+    UINT8 SgxLc;
+    UINT8 Pks;
     // EDX
-    UINT8 sgx_term;
-    UINT8 sgx_keys;
-    UINT8 avx512_4vnniw;
-    UINT8 avx512_4fmaps;
-    UINT8 fsrm;
-    UINT8 uintr;
+    UINT8 SgxTerm;
+    UINT8 SgxKeys;
+    UINT8 Avx512_4Vnniw;
+    UINT8 Avx512_4Fmaps;
+    UINT8 Fsrm;
+    UINT8 Uintr;
     // reserved
     // reserved
-    UINT8 avx512_vp2intersect;
-    UINT8 srbds_ctrl;
-    UINT8 md_clear;
-    UINT8 rtm_always_abort;
+    UINT8 Avx512Vp2intersect;
+    UINT8 SrbdsCtrl;
+    UINT8 MdClear;
+    UINT8 RtmAlwaysAbort;
     // reserved
-    UINT8 rtm_force_abort;
-    UINT8 serialize;
-    UINT8 hybrid;
-    UINT8 tsxldtrk;
+    UINT8 RtmForceAbort;
+    UINT8 Serialize;
+    UINT8 Hybrid;
+    UINT8 Tsxldtrk;
     // reserved
-    UINT8 pconfig;
-    UINT8 lbr;
-    UINT8 cet_ibt;
+    UINT8 Pconfig;
+    UINT8 Lbr;
+    UINT8 CetIbt;
     // reserved
-    UINT8 iamx_bf16;
-    UINT8 avx512_fp16;
-    UINT8 iamx_tile;
-    UINT8 iamx_int8;
-    UINT8 spec_ctrl;
-    UINT8 stibp;
-    UINT8 l1d_flush;
-    UINT8 arch_capabilities;
-    UINT8 core_capabilities;
-    UINT8 ssbd;
+    UINT8 AmxBf16;
+    UINT8 Avx512Fp16;
+    UINT8 AmxTile;
+    UINT8 AmxInt8;
+    UINT8 SpecCtrl;
+    UINT8 Stibp;
+    UINT8 L1dFlush;
+    UINT8 ArchCapabilities;
+    UINT8 CoreCapabilities;
+    UINT8 Ssbd;
     /* --- Sub Leaf 1 --- */
     // EAX
-    UINT8 sha512;
-    UINT8 sm3;
-    UINT8 sm4;
-    UINT8 rao_int;
-    UINT8 amx_vnni;
-    UINT8 avx512_bf16;
-    UINT8 lass;
-    UINT8 cmpccxadd;
-    UINT8 archperfmonext;
-    UINT8 dedup;
-    UINT8 fzrm;
-    UINT8 fsrs;
-    UINT8 rsrcs;
+    UINT8 Sha512;
+    UINT8 Sm3;
+    UINT8 Sm4;
+    UINT8 RaoInt;
+    UINT8 AmxVnni;
+    UINT8 Avx512Bf16;
+    UINT8 Lass;
+    UINT8 Cmpccxadd;
+    UINT8 Archperfmonext;
+    UINT8 Dedup;
+    UINT8 Fzrm;
+    UINT8 Fsrs;
+    UINT8 Rsrcs;
     // reserved
     // reserved
     // reserved
     // reserved
-    UINT8 fred;
-    UINT8 lkgs;
-    UINT8 wrmsrns;
-    UINT8 nmi_src;
-    UINT8 iamx_fp16;
-    UINT8 hreset;
-    UINT8 avx_ifma;
+    UINT8 Fred;
+    UINT8 Lkgs;
+    UINT8 Wrmsrns;
+    UINT8 NmiSrc;
+    UINT8 AmxFp16;
+    UINT8 Hreset;
+    UINT8 AvxIfma;
     // reserved
     // reserved
-    UINT8 lam;
-    UINT8 msrlist;
+    UINT8 Lam;
+    UINT8 Msrlist;
     // reserved
     // reserved
-    UINT8 invd_disable_post_bios_done;
-    UINT8 movrs;
+    UINT8 InvdDisablePostBiosDone;
+    UINT8 Movrs;
     // EBX
-    UINT8 ppin;
-    UINT8 pbndkb;
+    UINT8 Ppin;
+    UINT8 Pbndkb;
     // reserved
-    UINT8 cpuid_maxval_lim_rmv;
-    // reserved
-    // reserved
+    UINT8 CpuidMaxvalLimRmv;
     // reserved
     // reserved
     // reserved
@@ -558,22 +556,24 @@ typedef struct {
     // reserved
     // reserved
     // reserved
-    UINT8 mpsadbw_512;
     // reserved
-    UINT8 avx512_rao_fp;
+    // reserved
+    UINT8 Mpsadbw512;
+    // reserved
+    UINT8 Avx512RaoFp;
     // ECX
-    UINT8 rdt_m_asym;
-    UINT8 rdt_a_asym;
-    UINT8 reduced_isa;
+    UINT8 RdtMAsym;
+    UINT8 RdtAAsym;
+    UINT8 ReducedIsa;
     // reserved
-    UINT8 sipi64;
-    UINT8 msr_imm;
-    // reserved
-    // reserved
+    UINT8 Sipi64;
+    UINT8 MsrImm;
     // reserved
     // reserved
     // reserved
-    UINT8 ace;
+    // reserved
+    // reserved
+    UINT8 Ace;
     // reserved
     // reserved
     // reserved
@@ -596,30 +596,30 @@ typedef struct {
     // reserved
     // EDX
     // reserved
-    UINT8 avx512_vnni_fp16;
-    UINT8 avx512_vnni_int8;
-    UINT8 avx512_ne_convert;
-    UINT8 avx_vnni_int8;
-    UINT8 avx_ne_convert;
+    UINT8 Avx512VnniFp16;
+    UINT8 Avx512VnniInt8;
+    UINT8 Avx512NeConvert;
+    UINT8 AvxVnniInt8;
+    UINT8 AvxNeConvert;
     // reserved
     // reserved
-    UINT8 iamx_complex;
+    UINT8 AmxComplex;
     // reserved
-    UINT8 avx_vnni_int16;
-    UINT8 avx512_vnni_int16;
+    UINT8 AvxVnniInt16;
+    UINT8 Avx512VnniInt16;
     // reserved
-    UINT8 utmr;
-    UINT8 prefetchi;
-    UINT8 user_msr;
-    UINT8 avx512_bf16_ne;
-    UINT8 uiret_uif_from_rflags;
-    UINT8 cet_sss;
-    UINT8 avx10;
+    UINT8 Utmr;
+    UINT8 Prefetchi;
+    UINT8 UserMsr;
+    UINT8 Avx512Bf16Ne;
+    UINT8 UiretUifFromRflags;
+    UINT8 CetSss;
+    UINT8 Avx10;
     // reserved
-    UINT8 apx_f;
-    UINT8 sec_tee_attestation;
-    UINT8 mwait;
-    UINT8 slsm;
+    UINT8 ApxF;
+    UINT8 SecTeeAttestation;
+    UINT8 Mwait;
+    UINT8 Slsm;
     // reserved
     // reserved
     // reserved
@@ -629,298 +629,296 @@ typedef struct {
     // reserved
     /* --- Sub Leaf 2 --- */
     // EDX
-    UINT8 psfd;
-    UINT8 ipred_ctrl;
-    UINT8 rrsba_ctrl;
-    UINT8 ddpu_u;
-    UINT8 bhi_ctrl;
-    UINT8 mcdt_no;
-    UINT8 uc_lock_disable;
-    UINT8 monitor_mitg_no;    
-} cpuid_feat7_t;
+    UINT8 Psfd;
+    UINT8 IpredCtrl;
+    UINT8 RrsbaCtrl;
+    UINT8 DdpuU;
+    UINT8 BhiCtrl;
+    UINT8 McdtNo;
+    UINT8 UcLockDisable;
+    UINT8 MonitorMitgNo;
+} _CpuidFeat7, *_PCpuidFeat7;
 
 // Address sizes from leaf 0x80000008.
 typedef struct {
     // EBX
-    UINT8 clzero;
-    UINT8 retired_instr;
-    UINT8 xrstor_fp_err;
-    UINT8 invlpgb;
-    UINT8 rdpru;
-    UINT8 xotext; // Playstation 5????
-    UINT8 mbe;
+    UINT8 Clzero;
+    UINT8 RetiredInstr;
+    UINT8 XrstorFpErr;
+    UINT8 Invlpgb;
+    UINT8 Rdpru;
+    UINT8 Xotext; // Playstation 5????
+    UINT8 Mbe;
     // reserved
-    UINT8 mcommit;
-    UINT8 wbnoinvd;
-    UINT8 lbr_ext_v1;
+    UINT8 Mcommit;
+    UINT8 Wbnoinvd;
+    UINT8 LbrExtV1;
     // reserved
-    UINT8 ibpb;
-    UINT8 wbinvd_int;
-    UINT8 ibrs;
-    UINT8 stibp;
-    UINT8 ibrsalwayson;
-    UINT8 stibpalwayson;
-    UINT8 ibrs_preferred;
-    UINT8 ibrs_same_mode_protection;
-    UINT8 no_efer_lmsle;
-    UINT8 invlpgb_nested;
-    UINT8 lbr_tsx;
-    UINT8 ppin;
-    UINT8 ssbd;
-    UINT8 ssbd_legacy;
-    UINT8 ssbd_no;
-    UINT8 cpppc;
-    UINT8 psfd;
-    UINT8 btc_no;
-    UINT8 ibpb_ret;
-    UINT8 branch_sampling;
+    UINT8 Ibpb;
+    UINT8 WbinvdInt;
+    UINT8 Ibrs;
+    UINT8 Stibp;
+    UINT8 IbrsAlwaysOn;
+    UINT8 StibpAlwaysOn;
+    UINT8 IbrsPreferred;
+    UINT8 IbrsSameModeProtection;
+    UINT8 NoEferLmsle;
+    UINT8 InvlpgbNested;
+    UINT8 LbrTsx;
+    UINT8 Ppin;
+    UINT8 Ssbd;
+    UINT8 SsbdLegacy;
+    UINT8 SsbdNo;
+    UINT8 Cppc;
+    UINT8 Psfd;
+    UINT8 BtcNo;
+    UINT8 IbpbRet;
+    UINT8 BranchSampling;
     // EAX
-    UINT32 n_physical_addr_bits;
-    UINT32 n_linear_addr_bits;
-    UINT32 guest_physical_addr_size;
+    UINT32 NPhysicalAddrBits;
+    UINT32 NLinearAddrBits;
+    UINT32 GuestPhysicalAddrSize;
     // ECX
-    UINT32 n_physical_threads; // -1
-    UINT32 apic_id_size;
-    UINT32 perf_timestep_counter_size;
+    UINT32 NPhysicalThreads; // -1
+    UINT32 ApicIdSize;
+    UINT32 PerfTimestepCounterSize;
     // EDX
-    UINT32 invlpgb_max_pages;
-    UINT32 max_ecx_rdpru;
-} cpuid_ext_func2_t;
+    UINT32 InvlpgbMaxPages;
+    UINT32 MaxEcxRdpru;
+} _CpuidExtFunc2, *_PCpuidExtFunc2;
 
 // SVM features from leaf 0x8000000A (AMD).
 typedef struct {
     // EAX
-    UINT32 svm_revision;
+    UINT32 SvmRevision;
     // EBX
-    UINT32 nasid;
+    UINT32 Nasid;
     // EDX
-    UINT8  nested_paging;
-    UINT8  lbr_virt;
-    UINT8  svm_lock;
-    UINT8  nrip_save;
-    UINT8  tsc_rate_msr;
-    UINT8  vmcb_clean;
-    UINT8  flush_by_asid;
-    UINT8  decode_assists;
-    UINT8  pcm_virt;
-    UINT8  pause_filter;
-    UINT8  emp;
-    UINT8  pft;
-    UINT8  avic;
-    UINT8  v_vmsave_vmload;
-    UINT8  vgif;
-    UINT8  gmet;
-    UINT8  x2avic;
-    UINT8  ssscheck;
-    UINT8  spec_ctrl;
-    UINT8  rogpt;
-    UINT8  host_mce_override;
-    UINT8  tlbictl;
-    UINT8  vnmi;
-    UINT8  lbsvirt;
-    UINT8  extlvtoffsetfaultchg;
-    UINT8  vmcbaddrchkchg;
-    UINT8  blt;
-    UINT8  ihi;
-    UINT8  esi;
+    UINT8  NestedPaging;
+    UINT8  LbrVirt;
+    UINT8  SvmLock;
+    UINT8  NripSave;
+    UINT8  TscRateMsr;
+    UINT8  VmcbClean;
+    UINT8  FlushByAsid;
+    UINT8  DecodeAssists;
+    UINT8  PcmVirt;
+    UINT8  PauseFilter;
+    UINT8  Emp;
+    UINT8  Pft;
+    UINT8  Avic;
+    UINT8  VVmsaveVmload;
+    UINT8  Vgif;
+    UINT8  Gmet;
+    UINT8  X2avic;
+    UINT8  Ssscheck;
+    UINT8  SpecCtrl;
+    UINT8  Rogpt;
+    UINT8  HostMceOverride;
+    UINT8  Tlbictl;
+    UINT8  Vnmi;
+    UINT8  Lbsvirt;
+    UINT8  Extlvtoffsetfaultchg;
+    UINT8  Vmcbaddrchkchg;
+    UINT8  Blt;
+    UINT8  Ihi;
+    UINT8  Esi;
     // ECX
-    UINT8 gpcmef;
-    UINT8 pml;
-    UINT8 x2avic_ext;
-} cpuid_svm_info_t;
+    UINT8  Gpcmef;
+    UINT8  Pml;
+    UINT8  X2avicExt;
+} _CpuidSvmInfo, *_PCpuidSvmInfo;
 
 typedef struct {
     // EDX
-    UINT8 fpu;
-    UINT8 vme;
-    UINT8 de;
-    UINT8 pse;
-    UINT8 tsc;
-    UINT8 msr;
-    UINT8 pae;
-    UINT8 mce;
-    UINT8 cx8;
-    UINT8 apic;
+    UINT8 Fpu;
+    UINT8 Vme;
+    UINT8 De;
+    UINT8 Pse;
+    UINT8 Tsc;
+    UINT8 Msr;
+    UINT8 Pae;
+    UINT8 Mce;
+    UINT8 Cx8;
+    UINT8 Apic;
     // reserved
-    UINT8 sep;
-    UINT8 mtrr;
-    UINT8 pge;
-    UINT8 mca;
-    UINT8 cmov;
-    UINT8 pat;
-    UINT8 pse36;
-    UINT8 psn;
-    UINT8 clfsh;
-    UINT8 nx;
-    UINT8 ds;
-    UINT8 acpi;
-    UINT8 mmx;
-    UINT8 fxsr;
-    UINT8 sse;
-    UINT8 sse2;
-    UINT8 ss;
-    UINT8 htt;
-    UINT8 tm;
-    UINT8 ia64;
-    UINT8 pbe;
+    UINT8 Sep;
+    UINT8 Mtrr;
+    UINT8 Pge;
+    UINT8 Mca;
+    UINT8 Cmov;
+    UINT8 Pat;
+    UINT8 Pse36;
+    UINT8 Psn;
+    UINT8 Clfsh;
+    UINT8 Nx;
+    UINT8 Ds;
+    UINT8 Acpi;
+    UINT8 Mmx;
+    UINT8 Fxsr;
+    UINT8 Sse;
+    UINT8 Sse2;
+    UINT8 Ss;
+    UINT8 Htt;
+    UINT8 Tm;
+    UINT8 Ia64;
+    UINT8 Pbe;
     // ECX
-    UINT8 sse3;
-    UINT8 pclmulqdq;
-    UINT8 dtes64;
-    UINT8 monitor;
-    UINT8 ds_cpl;
-    UINT8 vmx;
-    UINT8 smx;
-    UINT8 est;
-    UINT8 tm2;
-    UINT8 ssse3;
-    UINT8 cntx_id;
-    UINT8 sdbg;
-    UINT8 fma;
-    UINT8 cx16;
-    UINT8 xtpr;
-    UINT8 pdcm;
+    UINT8 Sse3;
+    UINT8 Pclmulqdq;
+    UINT8 Dtes64;
+    UINT8 Monitor;
+    UINT8 DsCpl;
+    UINT8 Vmx;
+    UINT8 Smx;
+    UINT8 Est;
+    UINT8 Tm2;
+    UINT8 Ssse3;
+    UINT8 CntxId;
+    UINT8 Sdbg;
+    UINT8 Fma;
+    UINT8 Cx16;
+    UINT8 Xtpr;
+    UINT8 Pdcm;
     // reserved
-    UINT8 pcid;
-    UINT8 dca;
-    UINT8 sse4_1;
-    UINT8 sse4_2;
-    UINT8 x2apic;
-    UINT8 movbe;
-    UINT8 popcnt;
-    UINT8 tsc_deadline;
-    UINT8 aes_ni;
-    UINT8 xsave;
-    UINT8 osxsave;
-    UINT8 avx;
-    UINT8 f16c;
-    UINT8 rdrnd;
-    UINT8 hypervisor;
-} cpuid_feat_t;
+    UINT8 Pcid;
+    UINT8 Dca;
+    UINT8 Sse41;
+    UINT8 Sse42;
+    UINT8 X2apic;
+    UINT8 Movbe;
+    UINT8 Popcnt;
+    UINT8 TscDeadline;
+    UINT8 AesNi;
+    UINT8 Xsave;
+    UINT8 Osxsave;
+    UINT8 Avx;
+    UINT8 F16c;
+    UINT8 Rdrnd;
+    UINT8 Hypervisor;
+} _CpuidFeat, *_PCpuidFeat;
 
 typedef struct {
     // EDX
-    UINT8 fpu;
-    UINT8 vme;
-    UINT8 de;
-    UINT8 pse;
-    UINT8 tsc;
-    UINT8 msr;
-    UINT8 pae;
-    UINT8 mce;
-    UINT8 cx8;
-    UINT8 apic;
-    UINT8 syscall_k6;
-    UINT8 syscall;
-    UINT8 mtrr;
-    UINT8 pge;
-    UINT8 mca;
-    UINT8 cmov;
-    UINT8 pat;
-    UINT8 pse36;
-    UINT8 ecc_k7;
-    UINT8 ecc;
-    UINT8 nx;
-    UINT8 sem;
-    UINT8 mmxext;
-    UINT8 mmx;
-    UINT8 fxsr;
-    UINT8 fxsr_opt;
-    UINT8 pdpe1gb;
-    UINT8 rdtscp;
-    UINT8 rex32_k8;
-    UINT8 lm;
-    UINT8 tdnowext;
-    UINT8 tdnow;
+    UINT8 Fpu;
+    UINT8 Vme;
+    UINT8 De;
+    UINT8 Pse;
+    UINT8 Tsc;
+    UINT8 Msr;
+    UINT8 Pae;
+    UINT8 Mce;
+    UINT8 Cx8;
+    UINT8 Apic;
+    UINT8 SyscallK6;
+    UINT8 Syscall;
+    UINT8 Mtrr;
+    UINT8 Pge;
+    UINT8 Mca;
+    UINT8 Cmov;
+    UINT8 Pat;
+    UINT8 Pse36;
+    UINT8 EccK7;
+    UINT8 Ecc;
+    UINT8 Nx;
+    UINT8 Sem;
+    UINT8 Mmxext;
+    UINT8 Mmx;
+    UINT8 Fxsr;
+    UINT8 FxsrOpt;
+    UINT8 Pdpe1gb;
+    UINT8 Rdtscp;
+    UINT8 Rex32K8;
+    UINT8 Lm;
+    UINT8 Tdnowext;
+    UINT8 Tdnow;
     // ECX
-    UINT8 lahf_lm;
-    UINT8 cmp_legacy;
-    UINT8 svm;
-    UINT8 extapic;
-    UINT8 cr8_legacy;
-    UINT8 abm;
-    UINT8 sse4a;
-    UINT8 misalignsse;
-    UINT8 tdnowprefetch;
-    UINT8 osvw;
-    UINT8 ibs;
-    UINT8 xop;
-    UINT8 skinit;
-    UINT8 wdt;
-    UINT8 tbm0;
-    UINT8 lwp;
-    UINT8 fma4;
-    UINT8 tce;
-    UINT8 cvt16;
-    UINT8 nodeid_msr;
+    UINT8 LahfLm;
+    UINT8 CmpLegacy;
+    UINT8 Svm;
+    UINT8 Extapic;
+    UINT8 Cr8Legacy;
+    UINT8 Abm;
+    UINT8 Sse4a;
+    UINT8 Misalignsse;
+    UINT8 Tdnowprefetch;
+    UINT8 Osvw;
+    UINT8 Ibs;
+    UINT8 Xop;
+    UINT8 Skinit;
+    UINT8 Wdt;
+    UINT8 Tbm0;
+    UINT8 Lwp;
+    UINT8 Fma4;
+    UINT8 Tce;
+    UINT8 Cvt16;
+    UINT8 NodeidMsr;
     // reserved
-    UINT8 tbm;
-    UINT8 topoext;
-    UINT8 perfctr_core;
-    UINT8 perfctr_nb;
+    UINT8 Tbm;
+    UINT8 Topoext;
+    UINT8 PerfctrCore;
+    UINT8 PerfctrNb;
     UINT8 StreamPerfMon;
-    UINT8 dbx;
-    UINT8 perftsc;
-    UINT8 pcx_l2i_l3;
-    UINT8 monitorx;
-    UINT8 addr_mask_ext;
-    //reserved
-} cpuid_ext_feat_t;
+    UINT8 Dbx;
+    UINT8 Perftsc;
+    UINT8 PcxL2iL3;
+    UINT8 Monitorx;
+    UINT8 AddrMaskExt;
+    // reserved
+} _CpuidExtFeat, *_PCpuidExtFeat;
 
 // Topology from leaf 0x0B (Intel extended topology).
 typedef struct {
-    UINT8  level_type;            // 1=Thread, 2=Core, 3=Module, etc.
-    UINT32 logical_per_level;
-    UINT32 level_number;
-    UINT32 x2apic_id;
-    UINT8  valid;
-} cpuid_topology_t;
+    UINT8  LevelType;            // 1=Thread, 2=Core, 3=Module, etc.
+    UINT32 LogicalPerLevel;
+    UINT32 LevelNumber;
+    UINT32 X2apicId;
+    UINT8  Valid;
+} _CpuidTopology, *_PCpuidTopology;
 
 // Frequency info from leaves 0x15 and 0x16.
 typedef struct {
-    UINT32 tsc_denominator;
-    UINT32 tsc_numerator;
-    UINT64 tsc_freq_hz;
-    UINT32 base_freq_mhz;         // Leaf 0x16 EAX
-    UINT32 max_freq_mhz;          // Leaf 0x16 EBX
-    UINT32 bus_freq_mhz;          // Leaf 0x16 ECX
-} cpuid_freq_info_t;
+    UINT32 TscDenominator;
+    UINT32 TscNumerator;
+    UINT64 TscFreqHz;
+    UINT32 BaseFreqMhz;         // Leaf 0x16 EAX
+    UINT32 MaxFreqMhz;          // Leaf 0x16 EBX
+    UINT32 BusFreqMhz;          // Leaf 0x16 ECX
+} _CpuidFreqInfo, *_PCpuidFreqInfo;
 
 // Main CPU info structure.
 typedef struct {
-    char     vendor[13];
-    char     brand[49];
+    char     Vendor[13];
+    char     Brand[49];
 
-    UINT32 psn[3];
+    UINT32 Psn[3];
 
-    UINT32 max_basic_leaf;
-    UINT32 max_extended_leaf;
+    UINT32 MaxBasicLeaf;
+    UINT32 MaxExtendedLeaf;
 
+    _CpuidProcInfo   Proc;
+    _CpuidFeat       Features;
+    _CpuidExtFeat    FeaturesExt;
+    _CpuidFeat7      Feat7;
 
-    _CpuidProcInfo   proc;
-    cpuid_feat_t        features;
-    cpuid_ext_feat_t    features_ext;
-    cpuid_feat7_t       feat7;
+    _CpuidMwaitInfo  Mwait;
+    _CpuidThermalInfo Thermal;
 
-    _CpuidMwaitInfo  mwait;
-    _CpuidThermalInfo thermal;
-    
-    cpuid_ext_func2_t   addr_size;
-    cpuid_freq_info_t   freq;
-
+    _CpuidExtFunc2   AddrSize;
+    _CpuidFreqInfo   Freq;
 
     // --- Embedded sub-structures ---
 
-    _CpuidCacheInfo  caches[8];      // Leaf 4: usually 4-6 caches
-    UINT32            cache_count;
-    cpuid_topology_t    topo[8];        // Leaf 0x0B: usually 2-3 levels
-    UINT32            topo_count;
-    cpuid_svm_info_t    svm;            // Leaf 0x8000000A
+    _CpuidCacheInfo  Caches[8];      // Leaf 4: usually 4-6 caches
+    UINT32            CacheCount;
+    _CpuidTopology    Topo[8];        // Leaf 0x0B: usually 2-3 levels
+    UINT32            TopoCount;
+    _CpuidSvmInfo     Svm;            // Leaf 0x8000000A
 
-    UINT8             has_mwait;
-    UINT8             has_thermal;
-    UINT8             has_svm;
-    UINT8             has_topology;
+    UINT8             HasMwait;
+    UINT8             HasThermal;
+    UINT8             HasSvm;
+    UINT8             HasTopology;
 } _CpuInfo, *_PCpuInfo;
 
 /* --- Globals ---*/

@@ -25,6 +25,8 @@
 
 /* --- Includes ---*/
 #include <Int/IDT.H>
+#include <Int/CPUID/CPUID.H>
+
 
 /* --- Typedefs - Structs - Enums ---*/
 

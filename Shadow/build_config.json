@@ -37,7 +37,10 @@
             "dir": "MM"
         },
         {
-            "dir": "Int"
+            "dir": "Int",
+            "subdirs": [
+                "CPUID"
+            ]
         },
         {
             "dir": "DRV",

@@ -83,6 +83,10 @@ VOID KernelMain(
 
 	TALSetFrequency(1000);
 
+	#ifdef __INT_CPUID__
+	CpuidDump();
+	#endif
+
 	_PS2_KEY Event;
 
 	for (;;) {
