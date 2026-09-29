@@ -153,6 +153,7 @@ BootHighEntry:
 .size BootHighEntry, . - BootHighEntry
  
 .section .bss, "aw", @nobits
+.globl KernelStackTop
 .align 16
 KernelStack:
 	.space 65536

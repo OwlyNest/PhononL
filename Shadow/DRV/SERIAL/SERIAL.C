@@ -22,6 +22,7 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include "Internal/Types.H"
 #include <DRV/SERIAL/SERIAL.H>
 #include <XAL/XScope.H>
 #include <Int/IO.H>
@@ -74,7 +75,10 @@ static BOOLEAN SerialSelfTest(VOID) {
 
 SHSTATUS SerialInit(VOID) {
 	if (!SerialSelfTest()) {
-		return (SHSTATUS)-1;   /* no UART here; SerialWriteByte stays silent */
+		return STATUS_SUCCESS;   /* no UART here; SerialWriteByte stays silent
+									returning anything other than SUCCESS will halt the entire machine
+									Just exit, nothing sets present to true. SerialWriteByte will
+									take the first exit, if not, it'll spin out and kill itself */
 	}
 
 	// configure the UART
@@ -97,15 +101,19 @@ SHSTATUS SerialInit(VOID) {
 VOID SerialWriteByte(
 	IN UINT8 Byte
 ) {
+	UINT32 Spin;
 	if (!SerialPresent) {
 		return;
 	}
 
-	while (!(InByte(UART_LINE_STAT) & 0x20)) {
-		/* wait for THRE: transmit holding register empty */
-	}
+	for (Spin = 0x10000; Spin != 0; --Spin) {
+        if (InByte(UART_LINE_STAT) & 0x20) {
+            OutByte(UART_TX_DATA, Byte);
+            return;
+        }
+    }
 
-	OutByte(UART_TX_DATA, Byte);
+	SerialPresent = FALSE;
 }
 
 XSCOPENODE_PRI(SERIAL, SerialInit, XSCOPE_PRIORITY_FIRST);

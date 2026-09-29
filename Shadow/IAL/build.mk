@@ -1,5 +1,6 @@
-# Auto-generated build.mk for IAL — do not edit.
-# Regenerate via generate_build_mks.ps1 (config: build_config.json).
+# Auto-generated aggregator for IAL — do not edit.
+# Add/remove subsystems in build_config.json, not here.
 
 C_SRCS += IAL/IAL.C
-C_SRCS += IAL/PIC.C
+
+-include IAL/PIC/build.mk

@@ -52,8 +52,9 @@
 
 /* --- Includes ---*/
 #include <Int/IO.H>
-#include <IAL/PIC.H>
+#include <IAL/PIC/PIC.H>
 #include <IAL/IAL.H>
+#include <XAL/XScope.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 

@@ -16,10 +16,10 @@
 #include <Lib/Lib.H>
 #include <XAL/XScope.H>
 #include <MM/MM.H>
+#include <DRV/PS2/PS2.H>
 #include <info.h>
 #include <Int/Int.H>
 #include <IAL/IAL.H>
-#include <IAL/PIC.H>
 #include <TAL/TAL.H>
 #include <TAL/PIT.H>
  
@@ -127,22 +127,16 @@ VOID KernelMain(
 		printk("[x] Heap Heap Hooray!\r\n");
 	}
 
-	IALSetBackend(IALPicBackend());
-	if (IALInit() != 0) {
-        printk("[!] IAL backend '%s' failed to initialize\r\n", IALBackendName());
-        for (;;) { __asm__ __volatile__("cli\n\thlt"); }
-    }
-    printk("[Ial] Backend: %s\r\n", IALBackendName());
-
-    __asm__ __volatile__("sti");
-
 	TALSetBackend(TalPitBackend());
 	TALInit();
 	TALSetFrequency(1000);
 
+	_PS2_KEY Event;
+
 	for (;;) {
-		if (TALGetTicks() % 1000 == 0) {
-			printk("seconds\r\n");
+
+		if (PS2KeyboardRead(&Event)) {
+			printk("0x%x\r\n", Event.Scancode);
 		}
 	}
 }

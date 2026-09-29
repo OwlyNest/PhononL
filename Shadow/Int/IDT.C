@@ -115,6 +115,7 @@ static VOID IdtSetGate(
 	Entry->TypeAttr   = TypeAttr;
 	Entry->OffsetMid  = (UINT16)((Handler >> 16) & 0xFFFF);
 	Entry->OffsetHigh = (UINT32)((Handler >> 32) & 0xFFFFFFFF);
+	Entry->Ist = 0;
 	Entry->Reserved   = 0;
 }
 

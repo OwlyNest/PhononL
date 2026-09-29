@@ -37,6 +37,8 @@ typedef struct XScopeNode {
     INT32          Priority;    /* lower runs first among ready nodes */
     PCCHAR CONST  *Depends;
     SIZE_T         DependCount;
+	/* Try to avoid returning anything other than success, it will silently hang the machine.
+	   Hardware not existing is not a fail */
     XSCOPE_INIT_FN Init;
 } _XScopeNode, *_PXScopeNode;
 /*

@@ -22,7 +22,10 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include <XAL/XScope.H>
 #include <IAL/IAL.H>
+#include <IAL/PIC/PIC.H>
+#include <Lib/Lib.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 static _PIAL_BACKEND ActiveBackend = NULL;
@@ -43,3 +46,23 @@ static _PIAL_BACKEND ActiveBackend = NULL;
 #undef XAL_METHOD_VOID
 #undef XAL_PREFIX
 #undef XAL_BACKEND
+
+#ifdef __IAL_PIC__
+static SHSTATUS XScopeIALInit(VOID) {
+	IALSetBackend(IALPicBackend());
+	if (IALInit() != 0) {
+        printk("[!] IAL backend '%s' failed to initialize\r\n", IALBackendName());
+        for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+    }
+    printk("[Ial] Backend: %s\r\n", IALBackendName());
+
+    __asm__ __volatile__("sti");
+	return STATUS_SUCCESS;
+}
+#else 
+static SHSTATUS XScopeIALInit(VOID) {
+	return STATUS_SUCCESS; /* No backend compiled */
+}
+#endif
+
+XSCOPENODE(IAL, XScopeIALInit, "SERIAL", "X64_IDT");

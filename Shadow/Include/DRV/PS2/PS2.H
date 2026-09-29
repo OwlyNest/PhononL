@@ -24,6 +24,7 @@
 #define __DRV_PS2_PS2_H__
 
 /* --- Includes ---*/
+#include <DRV/PS2/I8042.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 /*

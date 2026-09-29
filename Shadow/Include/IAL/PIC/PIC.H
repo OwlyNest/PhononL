@@ -1,5 +1,5 @@
 /*
-	* Shadow/Include/IAL/PIC.H - IAL backend for the 8259 PIC
+	* Shadow/Include/IAL/PIC/PIC.H - IAL backend for the 8259 PIC
 	* Author:   amity
 	* Date:     Sat Sep 19 00:06:05 2026
 	* Copyright © 2026 OwlyNest
@@ -20,8 +20,8 @@
 */
 
 /* --- Macros ---*/
-#ifndef __IAL_PIC_H__
-#define __IAL_PIC_H__
+#ifndef __IAL_PIC_PIC_H__
+#define __IAL_PIC_PIC_H__
 
 /* --- Includes ---*/
 #include <IAL/IAL.H>
@@ -33,4 +33,4 @@
 /* --- Prototypes ---*/
 _PIAL_BACKEND IALPicBackend(VOID);
 
-#endif /* __IAL_PIC_H__ */
+#endif /* __IAL_PIC_PIC_H__ */

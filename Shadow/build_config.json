@@ -13,7 +13,10 @@
             "dir": "GAL"
         },
         {
-            "dir": "IAL"
+            "dir": "IAL",
+            "subdirs": [
+                "PIC"
+            ]
         },
         {
             "dir": "TAL"

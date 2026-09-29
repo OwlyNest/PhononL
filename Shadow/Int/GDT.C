@@ -96,8 +96,19 @@ static _GdtDesc Gdt[7];
 static _TSS KernelTss;
 static _GdtPtr gp;
 
-static VIRT_ADDR_T NmiStack;
-static VIRT_ADDR_T DfStack;
+/*
+	* IST stacks as static arrays, deliberately. NMI and #DF delivery
+	* loads RSP from TSS.Ist[] mid-event, inside the very emergency
+	* that is supposed to save the system, that stack switch must
+	* not be able to page-fault, by definition. Static memory cannot
+	* page-fault; allocated memory can. No allocator in the
+	* emergency path. (Also deletes the silent cli/hlt branch that
+	* ran when the allocation "failed".)
+*/
+static UINT8 NmiStack[IST_STACK_SIZE] __attribute__((aligned(16)));
+static UINT8 DfStack [IST_STACK_SIZE] __attribute__((aligned(16)));
+
+extern UINT64 KernelStackTop;
 
 /* --- Prototypes ---*/
 
@@ -149,24 +160,10 @@ VOID CreateTssDescriptor(
 VOID TssInit(VOID) {
 	CreateTssDescriptor((UINT64)&KernelTss, sizeof(KernelTss) - 1, &Gdt[5]);
 
-	NmiStack = MmAllocateVirtual(MmGetKernelAddressSpace(), IST_STACK_SIZE, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE));
-	DfStack  = MmAllocateVirtual(MmGetKernelAddressSpace(), IST_STACK_SIZE, (_MM_PROTECTION)(MM_PROT_READ | MM_PROT_WRITE));
-
-		if (NmiStack == MM_VIRT_INVALID || DfStack == MM_VIRT_INVALID) {
-		/*
-			* A gate pointing at an IST slot whose stack was never
-			* allocated is worse than no IST at all: delivery faults,
-			* and on #DF that means triple fault.
-		*/
-
-		for (;;) {
-			__asm__ __volatile__("cli\n\thlt");
-		}
-	}
-
 	KernelTss.IoMapBase = sizeof(KernelTss);
+	KernelTss.Rsp[0] = KernelStackTop;
 	KernelTss.Ist[0] = (UINT64)NmiStack + IST_STACK_SIZE;  /* IST1: NMI */
-	KernelTss.Ist[1] = (UINT64)DfStack  + IST_STACK_SIZE;  /* IST2: #DF */
+	KernelTss.Ist[1] = (UINT64)(DfStack  + IST_STACK_SIZE)	;  /* IST2: #DF */
 }
 
 VOID GdtInit(VOID) {

@@ -1,6 +1,5 @@
 XAL_META(Class,   xSCAL)
 XAL_META(Depends, IAL)
-XAL_META(Depends, Int)
 
 /* --- What the rest of the kernel calls --- */
 
@@ -8,7 +7,8 @@ XAL_META(Depends, Int)
     * Non-blocking: FALSE means "no key event waiting", not an error.
     * Safe to call from the main loop while the IRQ handler is producing.
 */
-XAL_METHOD(BOOLEAN, PS2KeyboardRead, (OUT _PPS2_KEY Key))
+XAL_METHOD(BOOLEAN,  PS2KeyboardRead, (OUT _PPS2_KEY Key))
+XAL_METHOD(SHSTATUS, KbdInit,         (VOID))
 
 /*
     * --- I8042.C -> KBD.C / MOUSE.C ---

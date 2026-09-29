@@ -194,6 +194,10 @@
 #define PS2_DEV_ERR0   0xFC /* Internal device error: no retry       */
 #define PS2_DEV_ERR1   0xFD /* Internal device error: no retry       */
 
+/* --- Universal device commands (shared by keyboard and mouse) ---*/
+#define PS2_DEV_CMD_RESET    0xFF /* Reset device, then BAT */
+#define PS2_DEV_CMD_IDENTIFY 0xF2 /* Report device ID       */
+
 /* Error codes, SmKFS G1 standard */
 typedef enum {
 	PS2_SUCCESS               = 0,
