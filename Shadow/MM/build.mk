@@ -3,5 +3,6 @@
 
 C_SRCS += MM/Heap.C
 C_SRCS += MM/Paging.C
+C_SRCS += MM/PAT.C
 C_SRCS += MM/PMM.C
 C_SRCS += MM/VMM.C

@@ -49,6 +49,12 @@
                 "SERIAL",
                 "PS2"
             ]
+        },
+        {
+            "dir": "BUS",
+            "subdirs": [
+                "PCI"
+            ]
         }
     ]
 }

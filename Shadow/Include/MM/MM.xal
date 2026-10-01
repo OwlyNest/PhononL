@@ -28,6 +28,9 @@ XAL_METHOD(VOID,         MmGetPhysicalStats,     (OUT _PMM_STATS Stats))
 XAL_METHOD(VOID,         MmPmmRebaseToDirectMap, (VOID))
 XAL_METHOD(VOID,         MmReclaimBootServices,  (IN PPhononBootInfo Info))
 
+/* --- PAT --- */
+XAL_METHOD(BOOLEAN,      PatAvailable,           (VOID))
+
 /* --- Paging (Arch/X64) --- */
 XAL_METHOD(SHSTATUS,           MmInitPaging,              (VOID))
 XAL_METHOD(_PMM_ADDRESS_SPACE, MmGetKernelAddressSpace,   (VOID))
@@ -38,6 +41,7 @@ XAL_METHOD(PHYS_ADDR_T,        MmGetPhysicalAddress,      (IN _PMM_ADDRESS_SPACE
 XAL_METHOD(VOID,               MmSwitchAddressSpace,      (IN _PMM_ADDRESS_SPACE Space))
 XAL_METHOD(VOID,               MmInvalidatePage,          (IN VIRT_ADDR_T Virt))
 XAL_METHOD(VOID,               MmFlushTlb,                (VOID))
+XAL_METHOD(VOID,               PagingWriteMsr,            (IN UINT32 Msr, IN UINT64 Value))
 
 /* --- VMM --- */
 XAL_METHOD(SHSTATUS,    MmMapRange,         (IN _PMM_ADDRESS_SPACE Space, IN VIRT_ADDR_T Virt, IN PHYS_ADDR_T Phys, IN SIZE_T Bytes, IN _MM_PROTECTION Prot))

@@ -20,44 +20,12 @@
 */
 
 /* --- Macros ---*/
-#define PTE_PRESENT     (1ULL << 0)
-#define PTE_WRITABLE    (1ULL << 1)
-#define PTE_USER        (1ULL << 2)
-#define PTE_PWT         (1ULL << 3)
-#define PTE_PCD         (1ULL << 4)
-#define PTE_ACCESSED    (1ULL << 5)
-#define PTE_DIRTY       (1ULL << 6)
-#define PTE_PAGE_SIZE   (1ULL << 7)         /* huge page, on PDPT / PD */
-#define PTE_PAT_4K      (1ULL << 7)         /* PAT selector, on PT only */
-#define PTE_GLOBAL      (1ULL << 8)
-#define PTE_NX          (1ULL << 63)
- 
-#define PTE_ADDR_MASK   0x000FFFFFFFFFF000ULL
- 
-#define PML4_INDEX(v)   (((v) >> 39) & 0x1FF)
-#define PDPT_INDEX(v)   (((v) >> 30) & 0x1FF)
-#define PD_INDEX(v)     (((v) >> 21) & 0x1FF)
-#define PT_INDEX(v)     (((v) >> 12) & 0x1FF)
- 
-#define MSR_IA32_PAT    0x277
-
-/*
-	* PAT slots, low byte first:
-	*   0 WB   1 WT   2 UC-  3 UC   4 WC   5 WT   6 UC-  7 UC
-	*
-	* Only slot 4 differs from the power-on default, and it is the whole
-	* point: write-combining is unavailable out of reset, and an
-	* uncached framebuffer is why drawing to the GOP surface on real
-	* hardware crawls. Slot 4 is selected by PAT=1, PCD=0, PWT=0.
-*/
-
-#define PAT_CONFIGURATION 0x0007040100070406ULL
-
 
 /* --- Includes ---*/
 #include <Lib/Lib.H>
 #include <MM/MM.H>
 #include <XAL/XScope.H>
+#include <Int/Int.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -67,7 +35,6 @@ static _MM_ADDRESS_SPACE KernelSpace;
 /* --- Prototypes ---*/
 static UINT64      PagingProtToFlags(IN _MM_PROTECTION Prot, IN BOOLEAN Leaf4K);
 static PHYS_ADDR_T PagingDescend(IN PHYS_ADDR_T TablePhys, IN SIZE_T Index, IN BOOLEAN Create);
-static VOID        PagingWriteMsr(IN UINT32 Msr, IN UINT64 Value);
 static VOID        PagingMapKernelSection(IN PVOID Start, IN PVOID End, IN _MM_PROTECTION Prot, IN PCCHAR Label);
 /* --- Functions ---*/
 
@@ -90,7 +57,7 @@ VOID MmSwitchAddressSpace(IN _PMM_ADDRESS_SPACE Space) {
 	__asm__ __volatile__("movq %0, %%cr3" :: "r"((UINT64)Space->TopLevelTable) : "memory");
 }
  
-static VOID PagingWriteMsr(
+VOID PagingWriteMsr(
 	IN UINT32 Msr,
 	IN UINT64 Value
 ) {
@@ -132,18 +99,39 @@ static UINT64 PagingProtToFlags(
 		Flags |= PTE_PCD;
 	}
  
-		if (Prot & MM_PROT_WRITECOMBINE) {
-		/*
-			* PAT slot 4. The selector bit sits at bit 7 for 4 KiB leaves and
-			* bit 12 for huge leaves -- same idea, different position, which
-			* is exactly the kind of detail worth keeping in one function.
-		*/
+	if (PatAvailable()) {
+		UINT64 Value = 0;
+		if (Prot & MM_PROT_WRITEBACK) {
+			Value = PAT_IDX_WB;
+		}
+		if (Prot & MM_PROT_WRITETHROUGH) {
+			Value = PAT_IDX_WT;
+		}
+		if (Prot & MM_PROT_UNCACHEDM) {
+			Value = PAT_IDX_UCM;
+		}
+
+		if (Prot & MM_PROT_UNCACHED) {
+			Value = PAT_IDX_UC;
+		}
+
+		if (Prot & MM_PROT_WRITEPROTECT) {
+			Value = PAT_IDX_WP;
+		}
+
+		if (Prot & MM_PROT_UNCACHEDM2) {
+			Value = PAT_IDX_UCM2;
+		}
+
+		if (Prot & MM_PROT_UNCACHED2) {
+			Value = PAT_IDX_UC2;
+		}
 
 		if (Leaf4K) {
-			Flags |= PTE_PAT_4K;
-		} else {
-			Flags |= (1ULL << 12);
+			Value = PAT_TO_LEAF4K(Value);
 		}
+
+		Flags |= Value;
 	}
  
 	return Flags;
@@ -424,4 +412,4 @@ SHSTATUS MmInitPaging(VOID) {
 	return STATUS_SUCCESS;
 }
 
-XSCOPENODE(MM_Paging, MmInitPaging, "MM_PMM");
+XSCOPENODE(MM_Paging, MmInitPaging, "MM_PAT");

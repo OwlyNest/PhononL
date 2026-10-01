@@ -73,6 +73,57 @@
 */
 #define MM_KERNEL_BASE      0xFFFFFFFF80000000ULL
 
+#define PTE_PRESENT     (1ULL << 0)
+#define PTE_WRITABLE    (1ULL << 1)
+#define PTE_USER        (1ULL << 2)
+#define PTE_PWT         (1ULL << 3)
+#define PTE_PCD         (1ULL << 4)
+#define PTE_ACCESSED    (1ULL << 5)
+#define PTE_DIRTY       (1ULL << 6)
+#define PTE_PAGE_SIZE   (1ULL << 7)         /* huge page, on PDPT / PD */
+#define PTE_PAT_4K      (1ULL << 7)         /* PAT selector, on PT only */
+#define PTE_GLOBAL      (1ULL << 8)
+#define PTE_NX          (1ULL << 63)
+ 
+#define PTE_ADDR_MASK   0x000FFFFFFFFFF000ULL
+ 
+#define PML4_INDEX(v)   (((v) >> 39) & 0x1FF)
+#define PDPT_INDEX(v)   (((v) >> 30) & 0x1FF)
+#define PD_INDEX(v)     (((v) >> 21) & 0x1FF)
+#define PT_INDEX(v)     (((v) >> 12) & 0x1FF)
+ 
+#define MSR_IA32_PAT    0x277
+
+#define PAT_LEAF4K  PTE_PAT_4K
+#define PAT_LEAFBIG (1 << 12)
+
+/* PAT index bits as they appear in a huge-page PTE (bit 12 = PAT) */
+#define PAT_IDX_WB     0ULL                             /* 000 → slot 0 */
+#define PAT_IDX_WT                             PTE_PWT  /* 001 → slot 1 */
+#define PAT_IDX_UCM                  PTE_PCD            /* 010 → slot 2 */
+#define PAT_IDX_UC    (              PTE_PCD | PTE_PWT) /* 011 → slot 3 */
+#define PAT_IDX_WC     PAT_LEAFBIG                      /* 100 → slot 4 */
+#define PAT_IDX_WP    (PAT_LEAFBIG |           PTE_PWT) /* 101 → slot 5 */
+#define PAT_IDX_UCM2  (PAT_LEAFBIG | PTE_PCD)           /* 110 → slot 6 */
+#define PAT_IDX_UC2   (PAT_LEAFBIG | PTE_PCD | PTE_PWT) /* 111 → slot 7 */
+
+/* Move the PAT bit from position 12 → 7 for a 4 KiB leaf */
+#define PAT_TO_LEAF4K(idx) \
+    (((idx) & ~PAT_LEAFBIG) | (((idx) & PAT_LEAFBIG) ? PTE_PAT_4K : 0))
+
+
+/*
+	* PAT slots, low byte first:
+	*   0 WB   1 WT   2 UC-  3 UC   4 WC   5 WT   6 UC-  7 UC
+	*
+	* Only slot 4 differs from the power-on default, and it is the whole
+	* point: write-combining is unavailable out of reset, and an
+	* uncached framebuffer is why drawing to the GOP surface on real
+	* hardware crawls. Slot 4 is selected by PAT=1, PCD=0, PWT=0.
+*/
+
+#define PAT_CONFIGURATION 0x0007040100070406ULL
+
 /* --- Includes ---*/
 #include <info.h>
 
@@ -84,16 +135,24 @@
 	* caller asking for a writable page should not have to know which bit
 	* that is on this particular CPU.
 */
-typedef enum MM_PROTECTION {
-	MM_PROT_NONE    = 0x0000,
-	MM_PROT_READ    = 0x0001,
-	MM_PROT_WRITE   = 0x0002,
-	MM_PROT_EXECUTE = 0x0004,
-	MM_PROT_USER    = 0x0008,          /* accessible from ring 3 */
-	MM_PROT_GLOBAL  = 0x0010,          /* survives CR3 reload */
-	MM_PROT_NOCACHE = 0x0020,          /* MMIO, control registers */
-	MM_PROT_WRITECOMBINE = 0x0040,     /* framebuffers, big win on real HW */
-} _MM_PROTECTION, *_PMM_PROTECTION;
+	typedef enum MM_PROTECTION {
+		MM_PROT_NONE    = 0x0000,
+		MM_PROT_READ    = 0x0001,
+		MM_PROT_WRITE   = 0x0002,
+		MM_PROT_EXECUTE = 0x0004,
+		MM_PROT_USER    = 0x0008,          /* accessible from ring 3 */
+		MM_PROT_GLOBAL  = 0x0010,          /* survives CR3 reload */
+		MM_PROT_NOCACHE = 0x0020,          /* MMIO, control registers */
+		/* PAT flags */
+		MM_PROT_WRITEBACK    = 0x0000,
+		MM_PROT_WRITETHROUGH = 0x0020,
+		MM_PROT_UNCACHEDM    = 0x0040,
+		MM_PROT_UNCACHED     = 0x0060,
+		MM_PROT_WRITECOMBINE = 0x0080,     /* framebuffers, big win on bare metal */
+		MM_PROT_WRITEPROTECT = 0x00A0,
+		MM_PROT_UNCACHEDM2   = 0x00C0,
+		MM_PROT_UNCACHED2    = 0x0100,
+	} _MM_PROTECTION, *_PMM_PROTECTION;
 
 /*
 	* An address space. TopLevelTable is deliberately not called Pml4: on
