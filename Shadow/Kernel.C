@@ -61,9 +61,6 @@ VOID KernelMain(
 	/* Output is safe again, and now write-combining. */
 	_MM_STATS Stats;
 	MmGetPhysicalStats(&Stats);
-
-	FbInit();
-	ConsoleInit();
  
 	printk("Shadow\r\n");
 	printk("[x] Boot info v%u, framebuffer %ux%u\r\n",

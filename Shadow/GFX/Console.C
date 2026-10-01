@@ -25,6 +25,7 @@
 #include <GFX/GFX.H>
 #include <Lib/Lib.H>
 #include <GFX/Console.H>
+#include <XAL/XScope.H>
 #include <MM/MM.H>
 
 /* --- Typedefs - Structs - Enums ---*/
@@ -149,7 +150,7 @@ static VOID ConsolePutc(CHAR C) {
 	MarkDirty(ConsoleRow);	
 }
 
-VOID ConsoleInit(VOID) {
+static SHSTATUS ConsoleInit(VOID) {
 	UINT32 FbW = 0;
 	UINT32 FbH = 0;
 
@@ -183,9 +184,8 @@ VOID ConsoleInit(VOID) {
 		ConsoleReady = 0;
 		ConsoleRows  = 0;
 		ConsoleCols  = 0;
-		return;
+		return STATUS_SUCCESS; /* Headless??? */
 	}
-
 	MemSet(ConsoleBuf, 0, BufSize);
 	ConsoleRow   = 0;
 	ConsoleCol   = 0;
@@ -194,6 +194,7 @@ VOID ConsoleInit(VOID) {
 	*/
 	ConsoleReady = 1;
 	MarkAllDirty(); /* Has less of a ring to it */
+	return STATUS_SUCCESS;
 }
 
 VOID ConsoleClear(VOID) {
@@ -260,3 +261,5 @@ VOID ConsoleRedraw(VOID) {
 INT ConsoleIsDirty(VOID) {
 	return DirtyTop >= 0;
 }
+
+XSCOPENODE_PRI(Console, ConsoleInit, XSCOPE_PRIORITY_FIRST, "FB", "MM_Heap");

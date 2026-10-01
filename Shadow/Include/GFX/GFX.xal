@@ -5,7 +5,6 @@
 XAL_META(Class, xSCAL)
 
 /* --- Console --- */
-XAL_METHOD(VOID, ConsoleInit,    (VOID))
 XAL_METHOD(VOID, ConsoleClear,   (VOID))
 XAL_METHOD(VOID, ConsoleWrite,   (PCCHAR str))
 XAL_METHOD(VOID, ConsoleRedraw,  (VOID))
@@ -13,7 +12,6 @@ XAL_METHOD(INT,  ConsoleIsDirty, (VOID))
 
 /* --- Framebuffer --- */
 XAL_METHOD(VOID,   FbSetBackend,  (IN _PGAL_BACKEND backend))
-XAL_METHOD(INT,    FbInit,        (VOID))
 XAL_METHOD(VOID,   FbUpdateHw,    (VOID))
 XAL_METHOD(VOID,   FbPresent,     (VOID))
 XAL_METHOD(UINT32, FbPackPixel,   (IN UINT8 r, IN UINT8 g, IN UINT8 b))

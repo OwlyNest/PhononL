@@ -281,7 +281,7 @@ $qemuArgs = @(
     "-drive", "if=pflash,format=raw,file=OVMF_VARS.4m.fd",
     "-net", "none",
     "-display", "gtk",
-    "-rtc", "base=localtime",
+    "-rtc", "base=localtime"
     "-d", "int,cpu_reset"
 )
 

@@ -40,20 +40,45 @@
         {
             "dir": "Int",
             "subdirs": [
-                "CPUID"
+                {
+                    "dir": "CPUID"
+                }
             ]
         },
         {
             "dir": "DRV",
             "subdirs": [
-                "SERIAL",
-                "PS2"
+                {
+                    "dir": "SERIAL"
+                },
+                {
+                    "dir": "PS2"
+                }
             ]
         },
         {
             "dir": "BUS",
             "subdirs": [
-                "PCI"
+                {
+                    "dir": "PCI",
+                    "subdirs": [
+                        {
+                            "dir": "ACPI"
+                        },
+                        {
+                            "dir": "BRIDGE"
+                        },
+                        {
+                            "dir": "CORE"
+                        },
+                        {
+                            "dir": "ENDPOINT"
+                        },
+                        {
+                            "dir": "HOST"
+                        }
+                    ]
+                }
             ]
         }
     ]

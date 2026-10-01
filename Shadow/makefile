@@ -304,7 +304,7 @@ endif
 # --------------------------------------------------------------------
 
 build/subsystems.mk: build_config.json generate_build_mks.ps1
-	@Write-Host "GEN build/subsystems.mk (build_config.json changed)"
+	@Write-Host "GEN build/subsystems.mk"
 	@& "$(CURDIR)/generate_build_mks.ps1"
 
 # --------------------------------------------------------------------

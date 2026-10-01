@@ -1,0 +1,70 @@
+XAL_META(Class, xSCAL)
+
+XAL_METHOD(VOID, Foo, (IN INT32 Bar))
+
+/* --- CORE --- */
+/* BUS.C */
+XAL_METHOD(?, PciBusAlloc, (?))
+XAL_METHOD(?, PciBusFree, (?))
+XAL_METHOD(?, PciBusAdd, (?))
+XAL_METHOD(?, PciBusRemove, (?))
+XAL_METHOD(?, PciRootBusCreate, (?))
+XAL_METHOD(?, PciBusAddDevice, (?))
+XAL_METHOD(?, PciBusRemoveDevice, (?))
+XAL_METHOD(?, PciBusWalk, (?))
+XAL_METHOD(?, PciBusGet, (?))
+XAL_METHOD(?, PciBusPut, (?)
+
+/* DEVICE.C */
+XAL_METHOD(?, PciDevAlloc, (?))
+XAL_METHOD(?, PciDevFree, (?))
+XAL_METHOD(?, PciDevInit, (?))
+XAL_METHOD(?, PciDevAdd, (?))
+XAL_METHOD(?, PciDevRemove, (?))
+XAL_METHOD(?, PciDevGet, (?))
+XAL_METHOD(?, PciDevPut, (?))
+XAL_METHOD(?, PciSetDrvData, (?))
+XAL_METHOD(?, PCIGetDrvData, (?))
+
+/* ENUM.C */
+XAL_METHOD(?, PciScanBus, (?))
+XAL_METHOD(?, PciScanSlot, (?))
+XAL_METHOD(?, PciScanDevice, (?))
+XAL_METHOD(?, PciScanFunction, (?))
+XAL_METHOD(?, PciScanBridge, (?))
+XAL_METHOD(?, PciAssignBusNumbers, (?))
+XAL_METHOD(?, PciEnumerate, (?))
+
+/* CONFIG.C */
+XAL_METHOD(?, PciReadConfig, (?))
+XAL_METHOD(?, PciWriteConfig, (?))
+XAL_METHOD(?, PciConfigOps, (?))
+
+
+/* CAPABILITY.C */
+XAL_METHOD(?, PciSFindCapability, (?))
+XAL_METHOD(?, PciFindNextCapability, (?))
+XAL_METHOD(?, PciFindNextExtCapability, (?))
+XAL_METHOD(?, PciCapabilityWalk, (?))
+
+/* RESOURCE.C */
+XAL_METHOD(?, PciReadBases, (?))
+XAL_METHOD(?, PciAssignResource, (?))
+XAL_METHOD(?, PciAssignUnassignedResources, (?))
+XAL_METHOD(?, PciUpdateResource, (?))
+
+/* IRQ.C */
+XAL_METHOD(?, PciReadIrqLine, (?))
+XAL_METHOD(?, PciWriteIrqLine, (?))
+XAL_METHOD(?, PciAssignIrq, (?))
+
+/* HOTPLUG.C */
+XAL_METHOD(?, PciHpAddSlot, (?))
+XAL_METHOD(?, PciHpRemoveSlot, (?))
+XAL_METHOD(?, PciRescanBus, (?))
+XAL_METHOD(?, PciRescanBridge, (?))
+
+/* --- HOST --- */
+/* --- ACPI --- */
+/* --- BRIDGE --- */
+/* --- ENDPOINT --- */

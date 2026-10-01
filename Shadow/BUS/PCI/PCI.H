@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/GFX/Console.H - simple scrolling text console for printk
+	* Shadow/BUS/PCI/PCI.H - [Enter description]
 	* Author:   amity
-	* Date:     Tue Sep 15 00:20:36 2026
+	* Date:     Thu Oct  1 16:12:56 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,21 +20,10 @@
 */
 
 /* --- Macros ---*/
-#ifndef __GFX_CONSOLE_H__
-#define __GFX_CONSOLE_H__
-
-#define CONSOLE_DEFAULT_COLS      80
-#define CONSOLE_DEFAULT_ROWS      40
-#define CHAR_W                    	8
-#define CHAR_H                    8
-#define CONSOLE_FG                GfxThemeColor(GFX_FG_TEXT)
-#define CONSOLE_BG                GfxThemeColor(GFX_BG_DESKTOP)
-
-#define CONSOLE_DEFAULT_TAB_WIDTH 4
+#ifndef __PCI_H__
+#define __PCI_H__
 
 /* --- Includes ---*/
-#include <GFX/FB.H>
-#include <Lib/Lib.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
@@ -42,4 +31,6 @@
 
 /* --- Prototypes ---*/
 
-#endif /* __GFX_CONSOLE_H__ */
+/* --- Functions ---*/
+
+#endif /* __PCI_H__ */

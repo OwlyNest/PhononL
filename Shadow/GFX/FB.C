@@ -25,6 +25,7 @@
 #include <GAL/GAL.H>
 #include <GFX/GFX.H>
 #include <Lib/Lib.H>
+#include <XAL/XScope.H>
 #include <MM/MM.H>
 // #include <screen/printk.h>
 
@@ -69,7 +70,7 @@ static struct {
 /* ==========================================================================
  * Initialize Framebuffer
  * ======================================================================= */
-int FbInit(void) {
+static SHSTATUS FbInit(void) {
   /* TODO: bring this back once mm/paging.c is ported. Framebuffer
    * addresses from any backend are meaningless until paging is real —
    * this used to guard fb_init() from being called too early. */
@@ -134,6 +135,8 @@ int FbInit(void) {
   printk("[fb] Using GAL backend '%s': %ux%u\r\n", GALBackendName(), FbHw.Width, FbHw.Height);
   return 0;
 }
+
+XSCOPENODE(FB, FbInit, "GAL");
 
 VOID FbUpdateHw(VOID) {
   _GAL_MODE Mode;
