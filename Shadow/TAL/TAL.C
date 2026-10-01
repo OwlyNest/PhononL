@@ -46,16 +46,12 @@ static _PTAL_BACKEND ActiveBackend = NULL;
 #undef XAL_PREFIX
 #undef XAL_BACKEND
 
-#ifdef __TAL_PIT__
 static SHSTATUS XScopeTALInit(VOID) {
+#ifdef __TAL_PIT__
 	TALSetBackend(TalPitBackend());
 	TALInit();
+#endif /* __TAL_XXX__ */
 	return STATUS_SUCCESS;
 }
-#else
-static SHSTATUS XScopeTALInit(VOID) {
-	return STATUS_SUCCESS; /* Continue without timer */
-}
-#endif
 
 XSCOPENODE(TAL, XScopeTALInit, "X64_IDT", "IAL");

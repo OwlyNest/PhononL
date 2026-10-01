@@ -104,7 +104,7 @@
 
 #else
     #error "XMcal.H requires XAL_EMIT_STRUCT, XAL_EMIT_PROTOTYPES, or XAL_EMIT_DISPATCH"
-#endif
+#endif /* XAL_EMIT_XXX */
 
 /* --- Includes ---*/
 

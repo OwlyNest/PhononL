@@ -925,4 +925,4 @@ typedef struct {
 
 /* --- Prototypes ---*/
 
-#endif
+#endif /* __INT_CPUID_CPUID_H__ */

@@ -175,6 +175,9 @@ if ($Rebuild) {
     Write-Host "[x] Bootloader lines: $lines_boot"
     Write-Host "[x] Shadow     lines: $lines_shadow"
 
+    Write-Host "[X] Enforcing Kernel Conventions "
+    Run "Shadow/CheckKernelConventions.ps1"
+
     $EfiOut = "Build/Phonon/DEBUG_$Toolchain/$Arch/PhononBoot.efi"
     if (!(Test-Path $EfiOut)) {
         throw "Build reported success but $EfiOut is missing — check the build log."

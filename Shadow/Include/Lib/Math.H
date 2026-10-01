@@ -58,4 +58,4 @@ typedef struct {
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-#endif
+#endif /* __LIB_MATH_H__ */

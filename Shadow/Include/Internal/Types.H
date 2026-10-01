@@ -31,7 +31,7 @@
 #define ARCH_X86 1
 #else
 #error "Unsupported architecture"
-#endif
+#endif /* ARCH_ */
 
 #define CONST const
 
@@ -180,7 +180,7 @@ typedef PHYSICAL_ADDRESS *PPHYSICAL_ADDRESS;
 typedef ULONGLONG PHYS_ADDR_T, *PPHYS_ADDR_T;
 #else
 typedef ULONG PHYS_ADDR_T, *PPHYS_ADDR_T;
-#endif
+#endif /* ARCH_ */
 
 /*
  * Page-frame number. Always pointer-width so
@@ -299,7 +299,7 @@ typedef VOID (*PKSTART_ROUTINE)(PVOID Context);
 #define FORCEINLINE static inline
 #define NORETURN
 #define ALIGN(N)
-#endif
+#endif /* __COMP__ */
 
 /* --- Utility Macros ---*/
 
@@ -323,7 +323,7 @@ typedef VOID (*PKSTART_ROUTINE)(PVOID Context);
 
 #define C_ASSERT(Expression) _Static_assert((Expression), #Expression)
 
-#endif
+#endif /* __cplusplus */
 
 /* --- Fundamental Type Guarantees ---*/
 

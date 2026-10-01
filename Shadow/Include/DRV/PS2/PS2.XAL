@@ -7,8 +7,9 @@ XAL_META(Depends, IAL)
     * Non-blocking: FALSE means "no key event waiting", not an error.
     * Safe to call from the main loop while the IRQ handler is producing.
 */
-XAL_METHOD(BOOLEAN,  PS2KeyboardRead, (OUT _PPS2_KEY Key))
-XAL_METHOD(SHSTATUS, KbdInit,         (VOID))
+XAL_METHOD(BOOLEAN, KbdRead,       (OUT _PPS2_KEY Key))
+XAL_METHOD(BOOLEAN, KbdSetLeds,    (IN UINT8 Leds))
+XAL_METHOD(BOOLEAN, Kbr,           (VOID))
 
 /*
     * --- I8042.C -> KBD.C / MOUSE.C ---

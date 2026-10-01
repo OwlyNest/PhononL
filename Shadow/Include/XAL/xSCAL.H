@@ -53,7 +53,7 @@
  
 #else
 	#error "XScal.H requires XAL_EMIT_PROTOTYPES"
-#endif
+#endif /* XAL_EMIT_XXX */
 
 /* --- Includes ---*/
 

@@ -54,4 +54,4 @@ typedef struct {
 
 /* --- Prototypes ---*/
 
-#endif
+#endif /* __LIB_PRINTK_H__ */

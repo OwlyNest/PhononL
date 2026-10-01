@@ -26,6 +26,9 @@
 #include <IAL/IAL.H>
 #include <IAL/PIC/PIC.H>
 #include <Lib/Lib.H>
+#ifdef __IAL_APIC__
+#include <Int/Int.H>
+#endif /* __IAL_APIC__ */
 
 /* --- Typedefs - Structs - Enums ---*/
 static _PIAL_BACKEND ActiveBackend = NULL;
@@ -47,22 +50,31 @@ static _PIAL_BACKEND ActiveBackend = NULL;
 #undef XAL_PREFIX
 #undef XAL_BACKEND
 
-#ifdef __IAL_PIC__
 static SHSTATUS XScopeIALInit(VOID) {
-	IALSetBackend(IALPicBackend());
-	if (IALInit() != 0) {
-        printk("[!] IAL backend '%s' failed to initialize\r\n", IALBackendName());
-        for (;;) { __asm__ __volatile__("cli\n\thlt"); }
-    }
-    printk("[Ial] Backend: %s\r\n", IALBackendName());
+#ifdef __IAL_APIC__
+	if (CpuidGet()->Features.Apic) {
+		IALSetBackend(IALApicBackend());
+	} else
+#endif /* __IAL_APIC__ */
+#ifdef __IAL_PIC__
+	{
+		IALSetBackend(IALPicBackend());
+	}
+#else
+	{
+		printk("[!] No usable IAL backend compiled in\r\n");
+		for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+	}
+#endif /* __IAL_XXX__ */
 
-    __asm__ __volatile__("sti");
+	if (IALInit() != 0) {
+		printk("[!] IAL backend '%s' failed to initialize\r\n", IALBackendName());
+		for (;;) { __asm__ __volatile__("cli\n\thlt"); }
+	}
+	printk("[Ial] Backend: %s\r\n", IALBackendName());
+
+	__asm__ __volatile__("sti");
 	return STATUS_SUCCESS;
 }
-#else 
-static SHSTATUS XScopeIALInit(VOID) {
-	return STATUS_SUCCESS; /* No backend compiled */
-}
-#endif
 
 XSCOPENODE(IAL, XScopeIALInit, "SERIAL", "X64_IDT");

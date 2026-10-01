@@ -22,10 +22,12 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include "Internal/Types.H"
 #include <DRV/PS2/I8042.H>
 #include <IAL/IAL.H>
 #include <DRV/PS2/PS2.H>
 #include <DRV/PS2/KBD.H>
+#include <Lib/Lib.H>
 #include <XAL/XScope.H>
 #include <Int/Int.H>
 
@@ -35,18 +37,20 @@
 /*
 	* Single producer (the IRQ handler), single consumer (the main
 	* loop), one CPU: two word-sized indices are the entire
-	* synchronization. No locks, no atomics, no volatile -- the
+	* synchronization. No locks, no atomics, the
 	* producer can only preempt the consumer between whole calls,
 	* and each call touches each index exactly once.
 */
 static _PS2_KEY KbdRing[KBD_RING_SIZE];
-static UINT32   KbdRingHead;       /* Producer (IRQ) writes here   */
-static UINT32   KbdRingTail;       /* Consumer (PS2KeyboardRead)   */
-static UINT32   KbdRingDropped;    /* Overflow diagnostic          */
+static __volatile__ UINT32   KbdRingHead;       /* Producer (IRQ) writes here   */
+static __volatile__ UINT32   KbdRingTail;       /* Consumer (PS2KeyboardRead)   */
+static __volatile__ UINT32   KbdRingDropped;    /* Overflow diagnostic          */
 
+static BOOLEAN KbdLive;
 static BOOLEAN KbdExtendedPending; /* 0xE0 seen: next byte is extended */
 static BOOLEAN KbdSysRqPending;
-static UINT8   KbdPauseRemaining = PS2_SET1_PAUSE_LEN;
+static UINT8   KbdPauseRemaining;
+static UINT8 KbdLeds;
 
 /* --- Prototypes ---*/
 
@@ -57,7 +61,7 @@ static UINT8   KbdPauseRemaining = PS2_SET1_PAUSE_LEN;
 	* Safe to call from the main loop while the IRQ handler is
 	* producing.
 */
-BOOLEAN PS2KeyboardRead(
+BOOLEAN KbdRead(
 	OUT _PPS2_KEY Key /* Receives the oldest pending event */
 ) {
 	if (KbdRingHead == KbdRingTail) {
@@ -74,7 +78,7 @@ BOOLEAN PS2KeyboardRead(
 	* old one. Evicting would silently reorder the stream; dropping
 	* keeps every byte that survived in order. Either policy can
 	* theoretically strand a press without its release (a stuck-key
-	* illusion downstream) -- 32 slots makes this a starved-scheduler
+	* illusion downstream), 32 slots makes this a starved-scheduler
 	* diagnostic path, not a design problem. The drop counter exists
 	* so bring-up can prove it never fires.
 */
@@ -98,7 +102,7 @@ static VOID KbdRingPush(
 	* safe by construction), push events, EOI, leave. The machine is
 	* interrupt-dark while this runs; every cycle here is stolen from
 	* every other device. Parse state (prefix flags) is written ONLY
-	* here -- single writer, no sharing, no locks, same discipline as
+	* here, single writer, no sharing, no locks, same discipline as
 	* the ring indices.
 	*
 	* Known approximations (documented, not solved): Print Screen
@@ -129,6 +133,11 @@ static VOID KbdIrqHandler(
 			continue;
 		}
 
+		/* Keyboard error reports: consume, count, never emit */
+		if (Byte == PS2_KBD_ERR_OVERRUN0 || Byte == PS2_KBD_ERR_OVERRUN1) {
+			continue;
+		}
+
 		if (Byte == PS2_SET1_PAUSE) {
 			Event.Scancode = PS2_SET1_PAUSE; /* synthetic ID */
 			Event.Pressed  = TRUE;
@@ -140,13 +149,14 @@ static VOID KbdIrqHandler(
 
 		if (Byte == PS2_SET1_EXTENDED) {
 			KbdExtendedPending = TRUE;
+			continue;
 		}
 
 		/*
 			* Print Screen, first half (E0 2A / E0 AA): arm the pair,
 			* emit nothing yet. E0 2A never occurs for any other key.
 		*/
-		if (KbdExtendedPending && !KbdSysRqPending && (Byte & ~PS2_SET1_BREAK) == PS2_SET1_SYSRQ_ID) {
+		if (KbdExtendedPending && !KbdSysRqPending && (Byte & ~PS2_SET1_BREAK) == PS2_SET1_SYSRQ_FIRST) {
 			KbdSysRqPending    = TRUE;
 			KbdExtendedPending = FALSE;
 			continue;
@@ -170,8 +180,6 @@ static VOID KbdIrqHandler(
 		KbdExtendedPending = FALSE;
 		KbdRingPush(&Event);
 	}
-
-
 	/*
 		* No EOI needed, IDT dispatcher already does that
 	*/
@@ -186,7 +194,7 @@ static VOID KbdIrqHandler(
 	* PS2KeyboardRead returns FALSE forever. Nobody outside can tell
 	* "no keyboard" from "no keys pressed".
 */
-SHSTATUS KbdInit(VOID) {
+static SHSTATUS KbdInit(VOID) {
 	UINT8 Config;
 	UINT8 Id0;
 	UINT8 Id1;
@@ -282,7 +290,7 @@ SHSTATUS KbdInit(VOID) {
 		goto Degrade;
 	}
 
-
+	KbdLive = TRUE;
 	IALEnableIrq(1);
 	return STATUS_SUCCESS;
 	/*
@@ -295,3 +303,53 @@ Degrade:
 } 
 
 XSCOPENODE(PS2_KBD, KbdInit, "X64_IDT", "I8042", "IAL");
+
+/*
+	* Mirror of the keyboard's latched LED state. The hardware holds
+	* the truth; this exists so callers set ABSOLUTE state, not deltas
+	* that drift after a lost command. Only meaningful when KbdLive.
+*/
+BOOLEAN KbdSetLeds(
+	IN UINT8 Leds /* Absolute state: PS2_KBD_LED_* bits */
+) {
+	if (!KbdLive) {
+		return FALSE; /* No keyboard: quiet no-op */
+	}
+
+	/*
+		*Two-ACK command: 0xED is acknowledged, then the LED byte is
+		* acknowledged again. Two complete handshakes, in order
+	*/
+	if (!I8042DeviceCommand(1, PS2_KBD_CMD_SET_LEDS)) {
+		return FALSE;
+	}
+
+	if (!I8042DeviceCommand(1, Leds)) {
+		return FALSE;
+	}
+
+	KbdLeds = Leds;
+	return TRUE;
+}
+
+/*
+	* The only key I find worth getting in a kernel, this is the closest we can get to debugging on real hardware that doesn´t have a UART
+	* I can't see the registers. I can't pause and the moment it starts dumping it fucking keeps doing that. It'll push text of the screen
+	* unrecoverable, without hesitation. So, we wait, unbounded, blocking, for an enter keyup event. Holding enter counts as a stream of keydown events
+	* waiting for keyup waits for release and can't continue multiple artificial breakpoints on accident.
+	*
+	* Unbounded spins are prohibited unless intended. It is intended here. We wan't to be absolutely certain that the kernel won't continue without explicit permission
+*/
+BOOLEAN Kbr(VOID) {
+	_PS2_KEY Key;
+	/* unbounded wait, */
+	for (;;) {
+		if (!KbdRead(&Key)){
+			continue;
+		}
+
+		if(Key.Scancode == 0x1C && !Key.Pressed) {
+			return TRUE;
+		}
+	}
+}

@@ -83,19 +83,13 @@ VOID KernelMain(
 
 	TALSetFrequency(1000);
 
-	#ifdef __INT_CPUID__
-	CpuidDump();
-	#endif
+	#ifdef __SH_DEBUG__
+	Kbr();
+	#endif /* __SH_DEBUG__ */
 
-	_PS2_KEY Event;
+	CpuidDump();
+
 
 	for (;;) {
-
-		if (PS2KeyboardRead(&Event)) {
-			printk("0x%02x %s%s\r\n",
-				Event.Scancode,
-				Event.Pressed ? "down" : "up",
-				Event.Extended ? " ext" : "");
-		}
 	}
 }

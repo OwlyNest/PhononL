@@ -49,6 +49,49 @@
 /* --- Keyboard device commands (KBD.H: keyboard-only protocol) ---*/
 #define PS2_KBD_CMD_ENABLE_SCAN  0xF4 /* Start sending scancodes */
 #define PS2_KBD_CMD_DISABLE_SCAN 0xF5 /* Stop scanning           */
+#define PS2_KBD_CMD_SET_LEDS      0xED /* + LED byte, ACKed twice  */
+#define PS2_KBD_CMD_ECHO          0xEE /* Diagnostic; removal probe */
+#define PS2_KBD_CMD_SET_SCANSET   0xF0 /* Footgun: see comment      */
+#define PS2_KBD_CMD_SET_TYPEMATIC 0xF3 /* + rate/delay byte         */
+#define PS2_KBD_CMD_DEFAULTS      0xF6 /* Restore default params    */
+
+/* Set 3 only: meaningless under translation. Kept for completeness;
+	do not send. */
+#define PS2_KBD_CMD_ALL_TYPEMATIC 0xF7
+#define PS2_KBD_CMD_ALL_MAKE_REL  0xF8
+#define PS2_KBD_CMD_ALL_MAKE      0xF9
+#define PS2_KBD_CMD_ALL_TMR       0xFA
+#define PS2_KBD_CMD_KEY_TYPEMATIC 0xFB /* + scancode */
+#define PS2_KBD_CMD_KEY_MAKE_REL  0xFC /* + scancode */
+#define PS2_KBD_CMD_KEY_MAKE      0xFD /* + scancode */
+
+/* Same value as PS2_DEV_RESEND, opposite direction: the host asking
+	the device to repeat its last byte. */
+#define PS2_KBD_CMD_RESEND        0xFE
+
+/* --- LED state byte (argument to 0xED) ---*/
+#define PS2_KBD_LED_SCROLL_LOCK (1 << 0)
+#define PS2_KBD_LED_NUM_LOCK    (1 << 1)
+#define PS2_KBD_LED_CAPS_LOCK   (1 << 2)
+
+/* --- 0xF0 sub-commands and its translated responses ---*/
+#define PS2_KBD_SCANSET_GET    0x00
+#define PS2_KBD_SCANSET_1      0x01
+#define PS2_KBD_SCANSET_2      0x02
+#define PS2_KBD_SCANSET_3      0x03
+/* Note 0x41: the same byte as the MF2 keyboard's identify response.
+   "Translated Set 2" all the way down. */
+#define PS2_KBD_SCANSET_RESP_1 0x43
+#define PS2_KBD_SCANSET_RESP_2 0x41
+#define PS2_KBD_SCANSET_RESP_3 0x3F
+
+/* --- 0xF3 typematic byte fields ---*/
+#define PS2_KBD_TYPEMATIC_RATE  0x1F /* bits 0-4: 30 Hz .. 2 Hz */
+#define PS2_KBD_TYPEMATIC_DELAY 0x60 /* bits 5-6: 250..1000 ms  */
+
+/* --- Special bytes the keyboard sends (never scancodes) ---*/
+#define PS2_KBD_ERR_OVERRUN0 0x00 /* Key detection error / overrun */
+#define PS2_KBD_ERR_OVERRUN1 0xFF /* ditto                         */
 
 /* --- Includes ---*/
 

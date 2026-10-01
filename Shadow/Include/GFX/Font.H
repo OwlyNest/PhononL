@@ -30,4 +30,4 @@ extern const UINT8 font8x8[256][8];   // 8x8 font
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-#endif
+#endif /* __GFX_FONT_H__ */

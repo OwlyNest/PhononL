@@ -1,6 +1,7 @@
 {
     "global_defines": [
-        "__OWLYNEST__"
+        "__OWLYNEST__",
+        "__SH_DEBUG__"
     ],
     "subsystems": [
         {
