@@ -1,7 +1,7 @@
 /*
-	* Shadow/Include/BUS/PCI/PCI.H - [Enter description]
+	* Shadow/BUS/PCI/CORE/INIT.C - [Enter description]
 	* Author:   amity
-	* Date:     Thu Oct  1 15:07:24 2026
+	* Date:     Fri Oct  2 21:18:48 2026
 	* Copyright © 2026 OwlyNest
 */
 
@@ -20,35 +20,28 @@
 */
 
 /* --- Macros ---*/
-#ifndef __BUS_PCI_PCI_H__
-#define __BUS_PCI_PCI_H__
+//#include "../PCI.H"
+#include <BUS/PCI/PCI.H>
+#include <BUS/PCI/PCI_IDS.H>
+#include <Lib/Lib.H>
+#include <DRV/PS2/PS2.H>
 
 /* --- Includes ---*/
 
 /* --- Typedefs - Structs - Enums ---*/
 
-typedef struct PciBus {
-
-} _PciBus, *_PPciBus;
-
-typedef struct PciDev {
-
-} _PciDev, *_PPciDev;
-
-typedef struct PciOps {
-
-} _PciOps, *_PPciOps;
-
-typedef VOID (*_PciWalkFn)(VOID);
-typedef VOID (*_PciCapWalkFn)(VOID);
-
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-#define XAL_EMIT_PROTOTYPES
-#include <XAL/xSCAL.H>
-#include <BUS/PCI/PCI.XAL>
-#undef XAL_EMIT_PROTOTYPES
-#undef XAL_METHOD
 
-#endif /* __BUS_PCI_PCI_H__ */
+/* --- Functions ---*/
+
+SHSTATUS PciInit(VOID) {
+	printk("[PCI] initialising subsystem (x86_64)\r\n");
+    Kbr();
+
+	printk("[PCI] enumeration complete\r\n");
+    Kbr();
+
+	return STATUS_SUCCESS;
+}

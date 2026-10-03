@@ -341,6 +341,7 @@ BOOLEAN KbdSetLeds(
 	* Unbounded spins are prohibited unless intended. It is intended here. We wan't to be absolutely certain that the kernel won't continue without explicit permission
 */
 BOOLEAN Kbr(VOID) {
+	#ifdef __SH_DEBUG__
 	_PS2_KEY Key;
 	/* unbounded wait, */
 	for (;;) {
@@ -352,4 +353,7 @@ BOOLEAN Kbr(VOID) {
 			return TRUE;
 		}
 	}
+	#else
+	return TRUE;
+	#endif /* __SH_DEBUG */
 }

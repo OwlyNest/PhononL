@@ -20,7 +20,8 @@
 #include <Int/Int.H>
 #include <IAL/IAL.H>
 #include <TAL/TAL.H>
- 
+#include <BUS/PCI/PCI.H>
+
 /* --- Typedefs - Structs - Enums ---*/
  
 /* --- Globals ---*/
@@ -33,7 +34,7 @@
 	* poison the boot info.
 */
 PhononBootInfo BootInfo;
- 
+
 /* --- Prototypes ---*/
 /* --- Functions ---*/
 
@@ -80,11 +81,15 @@ VOID KernelMain(
 
 	TALSetFrequency(1000);
 
-	#ifdef __SH_DEBUG__
 	Kbr();
-	#endif /* __SH_DEBUG__ */
 
 	CpuidDump();
+
+	Kbr();
+
+	PciInit();
+
+	Kbr();
 
 
 	for (;;) {

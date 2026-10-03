@@ -1,70 +1,75 @@
 XAL_META(Class, xSCAL)
 
-XAL_METHOD(VOID, Foo, (IN INT32 Bar))
-
 /* --- CORE --- */
+
+/* INIT.C */
+XAL_METHOD(SHSTATUS, PciInit, (VOID))
+
 /* BUS.C */
-XAL_METHOD(?, PciBusAlloc, (?))
-XAL_METHOD(?, PciBusFree, (?))
-XAL_METHOD(?, PciBusAdd, (?))
-XAL_METHOD(?, PciBusRemove, (?))
-XAL_METHOD(?, PciRootBusCreate, (?))
-XAL_METHOD(?, PciBusAddDevice, (?))
-XAL_METHOD(?, PciBusRemoveDevice, (?))
-XAL_METHOD(?, PciBusWalk, (?))
-XAL_METHOD(?, PciBusGet, (?))
-XAL_METHOD(?, PciBusPut, (?)
+XAL_METHOD(_PPciBus,     PciBusAlloc,            (VOID))
+XAL_METHOD(VOID,         PciBusFree,             (_PPciBus Bus))
+XAL_METHOD(INT,          PciBusAdd,              (_PPciBus Bus))
+XAL_METHOD(VOID,         PciBusRemove,           (_PPciBus Bus))
+XAL_METHOD(_PPciBus,     PciRootBusCreate,       (UINT Domain, UINT BusNr))
+XAL_METHOD(INT,          PciBusAddDevice,        (_PPciBus Bus, _PPciDev Dev))
+XAL_METHOD(VOID,         PciBusRemoveDevice,     (_PPciBus Bus, _PPciDev Dev))
+XAL_METHOD(VOID,         PciBusWalk,             (_PPciBus Bus, _PciWalkFn Fn, PVOID Ctx))
+XAL_METHOD(_PPciBus,     PciBusGet,              (_PPciBus Bus))
+XAL_METHOD(VOID,         PciBusPut,              (_PPciBus Bus))
 
 /* DEVICE.C */
-XAL_METHOD(?, PciDevAlloc, (?))
-XAL_METHOD(?, PciDevFree, (?))
-XAL_METHOD(?, PciDevInit, (?))
-XAL_METHOD(?, PciDevAdd, (?))
-XAL_METHOD(?, PciDevRemove, (?))
-XAL_METHOD(?, PciDevGet, (?))
-XAL_METHOD(?, PciDevPut, (?))
-XAL_METHOD(?, PciSetDrvData, (?))
-XAL_METHOD(?, PCIGetDrvData, (?))
+XAL_METHOD(_PPciDev,     PciDevAlloc,            (VOID))
+XAL_METHOD(VOID,         PciDevFree,             (_PPciDev Dev))
+XAL_METHOD(INT,          PciDevInit,             (_PPciDev Dev, _PPciBus Bus, UINT DevFn))
+XAL_METHOD(INT,          PciDevAdd,              (_PPciDev Dev))
+XAL_METHOD(VOID,         PciDevRemove,           (_PPciDev Dev))
+XAL_METHOD(_PPciDev,     PciDevGet,              (_PPciDev Dev))
+XAL_METHOD(VOID,         PciDevPut,              (_PPciDev Dev))
+XAL_METHOD(VOID,         PciSetDrvData,          (_PPciDev Dev, PVOID Data))
+XAL_METHOD(PVOID,       PciGetDrvData,          (_PPciDev Dev))
 
 /* ENUM.C */
-XAL_METHOD(?, PciScanBus, (?))
-XAL_METHOD(?, PciScanSlot, (?))
-XAL_METHOD(?, PciScanDevice, (?))
-XAL_METHOD(?, PciScanFunction, (?))
-XAL_METHOD(?, PciScanBridge, (?))
-XAL_METHOD(?, PciAssignBusNumbers, (?))
-XAL_METHOD(?, PciEnumerate, (?))
+XAL_METHOD(INT,          PciScanBus,             (_PPciBus Bus))
+XAL_METHOD(INT,          PciScanSlot,            (_PPciBus Bus, UINT Slot))
+XAL_METHOD(INT,          PciScanDevice,          (_PPciBus Bus, UINT Slot, UINT Func))
+XAL_METHOD(INT,          PciScanFunction,        (_PPciBus Bus, UINT DevFn))
+XAL_METHOD(INT,          PciScanBridge,          (_PPciDev Bridge))
+XAL_METHOD(VOID,         PciAssignBusNumbers,    (_PPciBus Bus, UINT *NextBus))
+XAL_METHOD(INT,          PciEnumerate,           (VOID))
 
 /* CONFIG.C */
-XAL_METHOD(?, PciReadConfig, (?))
-XAL_METHOD(?, PciWriteConfig, (?))
-XAL_METHOD(?, PciConfigOps, (?))
-
+XAL_METHOD(INT,          PciReadConfig,          (_PPciDev Dev, UINT Offset, UINT Size, PVOID Val))
+XAL_METHOD(INT,          PciWriteConfig,         (_PPciDev Dev, UINT Offset, UINT Size, UINT64 Val))
+XAL_METHOD(VOID,         PciConfigOpsRegister,   (_PPciOps Ops))
 
 /* CAPABILITY.C */
-XAL_METHOD(?, PciSFindCapability, (?))
-XAL_METHOD(?, PciFindNextCapability, (?))
-XAL_METHOD(?, PciFindNextExtCapability, (?))
-XAL_METHOD(?, PciCapabilityWalk, (?))
+XAL_METHOD(UINT,         PciFindCapability,      (_PPciDev Dev, UINT CapId))
+XAL_METHOD(UINT,         PciFindNextCapability,  (_PPciDev Dev, UINT Pos, UINT CapId))
+XAL_METHOD(UINT,         PciFindExtCapability,   (_PPciDev Dev, UINT CapId))
+XAL_METHOD(UINT,         PciFindNextExtCapability,(_PPciDev Dev, UINT Pos, UINT CapId))
+XAL_METHOD(VOID,         PciCapabilityWalk,      (_PPciDev Dev, _PciCapWalkFn Fn, PVOID Ctx))
 
 /* RESOURCE.C */
-XAL_METHOD(?, PciReadBases, (?))
-XAL_METHOD(?, PciAssignResource, (?))
-XAL_METHOD(?, PciAssignUnassignedResources, (?))
-XAL_METHOD(?, PciUpdateResource, (?))
+XAL_METHOD(INT,          PciReadBases,           (_PPciDev Dev))
+XAL_METHOD(INT,          PciAssignResource,      (_PPciDev Dev, UINT Bar))
+XAL_METHOD(INT,          PciAssignUnassignedResources, (_PPciBus Bus))
+XAL_METHOD(INT,          PciUpdateResource,      (_PPciDev Dev, UINT Bar))
 
 /* IRQ.C */
-XAL_METHOD(?, PciReadIrqLine, (?))
-XAL_METHOD(?, PciWriteIrqLine, (?))
-XAL_METHOD(?, PciAssignIrq, (?))
+XAL_METHOD(UINT,         PciReadIrqLine,         (_PPciDev Dev))
+XAL_METHOD(VOID,         PciWriteIrqLine,        (_PPciDev Dev, UINT Line))
+XAL_METHOD(INT,          PciAssignIrq,           (_PPciDev Dev))
 
 /* HOTPLUG.C */
-XAL_METHOD(?, PciHpAddSlot, (?))
-XAL_METHOD(?, PciHpRemoveSlot, (?))
-XAL_METHOD(?, PciRescanBus, (?))
-XAL_METHOD(?, PciRescanBridge, (?))
+XAL_METHOD(INT,          PciHpAddSlot,           (_PPciBus Bus, UINT Slot))
+XAL_METHOD(VOID,         PciHpRemoveSlot,        (_PPciBus Bus, UINT Slot))
+XAL_METHOD(INT,          PciRescanBus,           (_PPciBus Bus))
+XAL_METHOD(INT,          PciRescanBridge,        (_PPciDev Bridge))
 
 /* --- HOST --- */
+
 /* --- ACPI --- */
+
 /* --- BRIDGE --- */
+
 /* --- ENDPOINT --- */

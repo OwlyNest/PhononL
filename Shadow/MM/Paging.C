@@ -114,6 +114,10 @@ static UINT64 PagingProtToFlags(
 		if (Prot & MM_PROT_UNCACHED) {
 			Value = PAT_IDX_UC;
 		}
+		
+		if (Prot & MM_PROT_WRITECOMBINE) {
+			Value = PAT_IDX_WC;
+		}
 
 		if (Prot & MM_PROT_WRITEPROTECT) {
 			Value = PAT_IDX_WP;
