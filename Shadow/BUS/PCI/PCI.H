@@ -23,6 +23,10 @@
 #ifndef __PCI_H__
 #define __PCI_H__
 
+#define PCI_DEVFN(slot, func)   ((((slot) & 0x1f) << 3) | ((func) & 0x07))
+#define PCI_DEV(devfn)          (((devfn) >> 3) & 0x1f)
+#define PCI_FUNC(devfn)         ((devfn) & 0x07)   
+
 /* --- Includes ---*/
 
 /* --- Typedefs - Structs - Enums ---*/

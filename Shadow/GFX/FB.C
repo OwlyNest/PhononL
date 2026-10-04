@@ -136,7 +136,7 @@ static SHSTATUS FbInit(void) {
   return 0;
 }
 
-XSCOPENODE(FB, FbInit, "GAL");
+XSCOPENODE(FB, FbInit, "GAL", "MM_Heap");
 
 VOID FbUpdateHw(VOID) {
   _GAL_MODE Mode;
@@ -345,8 +345,7 @@ VOID FbDrawLine(int x0, int y0, int x1, int y1, UINT32 color) {
   GfxDrawLine(&fb.Back, x0, y0, x1, y1, color);
 }
 
-VOID GfxDrawLine(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1,
-                   UINT32 color) {
+VOID GfxDrawLine(_PGFX_SURFACE surface, int x0, int y0, int x1, int y1, UINT32 color) {
   int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
   int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
   int err = dx + dy, e2;

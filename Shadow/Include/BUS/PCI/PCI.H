@@ -28,19 +28,46 @@
 /* --- Typedefs - Structs - Enums ---*/
 
 typedef struct PciBus {
-
+	UINT           Domain;
+	UINT           Number;
+	struct PciBus *Parent;
 } _PciBus, *_PPciBus;
 
 typedef struct PciDev {
+	_PPciBus        Bus;
+	UINT            DevFn; /* linux but usefull */
+	UINT16          Vendor;
+    UINT16          Device;
+    UINT32          Class;
+    UINT8           Revision;
+    UINT8           HdrType;
 
+	/* Bridge only */
+	_PPciBus Subordinate;
+	UINT8    Primary;
+	UINT8    Secondary;
+	UINT8    SubBus;
+
+    PVOID           DrvData;
 } _PciDev, *_PPciDev;
 
-typedef struct PciOps {
+typedef struct PciBusNode {
+    _PciBus             Bus;
+    struct PciBusNode  *Next;
+} PciBusNode;
 
+typedef struct PciDevNode {
+    _PciDev             Dev;
+    struct PciDevNode  *Next;
+} PciDevNode;
+
+typedef struct PciOps {
+	SHSTATUS (*Read) (_PPciDev Dev, UINT Offset, SIZE_T Size, PVOID Val);
+	SHSTATUS (*Write)(_PPciDev Dev, UINT Offset, SIZE_T Size, UINT64 Val);
 } _PciOps, *_PPciOps;
 
-typedef VOID (*_PciWalkFn)(VOID);
-typedef VOID (*_PciCapWalkFn)(VOID);
+typedef VOID (*_PciWalkFn)   (_PPciDev Dev, PVOID Ctx);
+typedef VOID (*_PciCapWalkFn)(_PPciDev Dev, UINT CapPos, PVOID Ctx);
 
 /* --- Globals ---*/
 

@@ -37,10 +37,22 @@
 /* --- Functions ---*/
 
 SHSTATUS PciInit(VOID) {
-	printk("[PCI] initialising subsystem (x86_64)\r\n");
+	printk("[PCI] Initialising subsystem (x86_64)\r\n");
     Kbr();
 
-	printk("[PCI] enumeration complete\r\n");
+	PciHostInit();
+	Kbr();
+
+	printk("[PCI] Starting enumeration\r\n");
+	Kbr();
+
+	SHSTATUS Rc = PciEnumerate();
+	if (Rc < 0) {
+		printk("[PCI] enumeration failed (%d)\r\n", Rc);
+        return Rc;
+	}
+
+	printk("[PCI] Enumeration complete\r\n");
     Kbr();
 
 	return STATUS_SUCCESS;

@@ -30,21 +30,107 @@
 /* --- Globals ---*/
 
 /* --- Prototypes ---*/
-FORCEINLINE VOID OutByte(
-	IN UINT16 Port,
-	IN UINT8 Value
+FORCEINLINE UINT32 InData(
+    IN UINT16 Port,
+    IN SIZE_T Size
 ) {
-	__asm__ __volatile__("outb %0, %1":: "a"(Value), "Nd"(Port));
+    switch (Size) {
+        case 1: {
+            UINT8 Value;
+
+            __asm__ __volatile__(
+                "inb %1, %0"
+                : "=a"(Value)
+                : "Nd"(Port)
+            );
+
+            return Value;
+        }
+
+        case 2: {
+            UINT16 Value;
+
+            __asm__ __volatile__(
+                "inw %1, %0"
+                : "=a"(Value)
+                : "Nd"(Port)
+            );
+
+            return Value;
+        }
+
+        case 4: {
+            UINT32 Value;
+
+            __asm__ __volatile__(
+                "inl %1, %0"
+                : "=a"(Value)
+                : "Nd"(Port)
+            );
+
+            return Value;
+        }
+
+        default: {
+            __builtin_unreachable();
+		}
+    }
 }
 
-FORCEINLINE UINT8 InByte(
-	IN UINT16 Port
+FORCEINLINE VOID OutData(
+    IN UINT16 Port,
+    IN SIZE_T Size,
+    IN UINT32 Value
 ) {
-	UINT8 Value;
-	__asm__ __volatile__("inb %1, %0" : "=a"(Value) : "Nd"(Port));
+    switch (Size) {
+        case 1: {
+            UINT8 Data = (UINT8)Value;
 
-	return Value;
+            __asm__ __volatile__(
+                "outb %0, %1"
+                :
+                : "a"(Data), "Nd"(Port)
+            );
+
+            break;
+        }
+
+        case 2: {
+            UINT16 Data = (UINT16)Value;
+
+            __asm__ __volatile__(
+                "outw %0, %1"
+                :
+                : "a"(Data), "Nd"(Port)
+            );
+
+            break;
+        }
+
+        case 4: {
+            __asm__ __volatile__(
+                "outl %0, %1"
+                :
+                : "a"(Value), "Nd"(Port)
+            );
+
+            break;
+        }
+
+        default: {
+            __builtin_unreachable();
+		}
+    }
 }
+
+
+#define InByte(Port) InData(Port, 1)
+#define InWord(Port) InData(Port, 2)
+#define InLong(Port) InData(Port, 4)   
+
+#define OutByte(Port, Value) OutData(Port, 1, Value);
+#define OutWord(Port, Value) OutData(Port, 2, Value);
+#define OutLong(Port, Value) OutData(Port, 4, Value);
 
 FORCEINLINE VOID IOWait(VOID) {
 	/*

@@ -88,4 +88,4 @@ static SHSTATUS XScopeGALInit(VOID) {
 }
 
 
-XSCOPENODE(GAL, XScopeGALInit, "MM_VMM");
+XSCOPENODE(GAL, XScopeGALInit, "MM_Heap");

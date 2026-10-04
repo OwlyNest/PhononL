@@ -22,12 +22,58 @@
 /* --- Macros ---*/
 
 /* --- Includes ---*/
+#include <BUS/PCI/PCI.H>
+#include <Lib/Lib.H>
 
 /* --- Typedefs - Structs - Enums ---*/
 
 /* --- Globals ---*/
-
+static _PciOps CurrentOps;
 /* --- Prototypes ---*/
 
 /* --- Functions ---*/
+VOID PciConfigOpsRegister(
+	IN _PPciOps Ops
+) {
+	if (Ops == NULL) {
+		printk("[PCI] ConfigOpsRegister: NULL Ops\r\n");
+		return;
+	}
+	CurrentOps = *Ops;
+	printk("[PCI] Config ops registered\r\n");
+}
 
+
+SHSTATUS PciReadConfig(
+	IN _PPciDev Dev,
+	IN UINT Offset,
+	IN UINT Size,
+	OUT PVOID Val
+) {
+	if (Dev == NULL || Val == NULL) {
+		return (SHSTATUS)-1;
+	}
+
+	if (CurrentOps.Read == NULL) {
+		return (SHSTATUS)-1;
+	}
+
+	return (SHSTATUS)CurrentOps.Read(Dev, Offset, Size, Val);
+}
+
+SHSTATUS PciWriteConfig(
+	IN _PPciDev Dev,
+	IN UINT Offset,
+	IN UINT Size,
+	IN UINT64 Val
+) {
+	if (Dev == NULL) {
+		return (SHSTATUS)-1;
+	}
+
+	if (CurrentOps.Write == NULL) {
+		return (SHSTATUS)-1;
+	}
+
+	return (SHSTATUS)CurrentOps.Write(Dev, Offset, Size, Val);
+}
