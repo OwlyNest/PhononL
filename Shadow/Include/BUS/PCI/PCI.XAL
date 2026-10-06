@@ -1,9 +1,15 @@
 XAL_META(Class, xSCAL)
 
+
+/* --- PciNames.C --- */
+XAL_METHOD(PCCHAR,       PciVendorName,          (IN UINT16 VendorId))
+XAL_METHOD(PCCHAR,       PciDeviceName,          (IN UINT16 VendorId, IN UINT16 DeviceId))
+
+
 /* --- CORE --- */
 
 /* INIT.C */
-XAL_METHOD(SHSTATUS, PciInit, (VOID))
+XAL_METHOD(SHSTATUS,     PciInit,                (VOID))
 
 /* BUS.C */
 XAL_METHOD(_PPciBus,     PciBusAlloc,            (VOID))

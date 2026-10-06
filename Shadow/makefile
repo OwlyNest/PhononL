@@ -122,6 +122,7 @@ CFLAGS := \
     -Wall \
     -Wextra \
     -Werror \
+	-Wno-trigraphs \
     -include Include/Internal/Types.H \
     -x c
 
@@ -303,9 +304,13 @@ endif
 # Generated build files — regeneration rule
 # --------------------------------------------------------------------
 
-build/subsystems.mk: build_config.json generate_build_mks.ps1
+build/subsystems.mk: BUS/PCI/PciNames.C build_config.json generate_build_mks.ps1
 	@Write-Host "GEN build/subsystems.mk"
 	@& "$(CURDIR)/generate_build_mks.ps1"
+
+BUS/PCI/PciNames.C:
+	@Write-Host "GEN BUS/PCI/PciNames.C VId DId DataBase"
+	@& "$(CURDIR)/Generate-PciNames.ps1" -PciIdsPath "$(CURDIR)/BUS/PCI/pci.ids" -OutputDir "$(CURDIR)/BUS/PCI/"
 
 # --------------------------------------------------------------------
 # Dependencies
@@ -321,6 +326,7 @@ clean:
 	@Write-Host "Cleaning Shadow build..."
 	$(call RM_DIR,$(BUILD_DIR))
 	$(call RM_FILE,$(TARGET))
+	$(call RM_FILE,BUS/PCI/PciNames.C)
 
 # --------------------------------------------------------------------
 # Inspection

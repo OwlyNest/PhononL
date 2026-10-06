@@ -59,12 +59,15 @@ SHSTATUS PciScanFunction(
 	       Dev->Vendor, Dev->Device,
 	       Dev->Class.Class, Dev->Class.SubClass, Dev->Class.ProgIF);
 
+	printk("\r\n");
 	/* Human description on its own line */
-	printk("           %s / %s",
-	       Dev->ClassName.Class, Dev->ClassName.SubClass);
+	printk("           %s / %s", Dev->ClassName.Class, Dev->ClassName.SubClass);
 	if (Dev->ClassName.ProgIF && Dev->ClassName.ProgIF[0] != '-') {
 		printk(" (%s)", Dev->ClassName.ProgIF);
 	}
+	printk("\r\n");
+	printk("           Vendor: %s    Device: %s\r\n", PciVendorName(Dev->Vendor), PciDeviceName(Dev->Vendor, Dev->Device));
+	
 	printk("\r\n");
 
 	PciReadBases(Dev);
@@ -75,6 +78,8 @@ SHSTATUS PciScanFunction(
 			PciAssignResource(Dev, B);
 		}
 	}
+
+	printk("\r\n");
 
 	PciBusAddDevice(Bus, Dev);
 	PciDevAdd(Dev);
