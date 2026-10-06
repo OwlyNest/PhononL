@@ -35,13 +35,13 @@
 /* --- Functions ---*/
 _PPciBus PciBusAlloc(VOID) {
     if (!ExPoolReady()) {
-        printk("[PCI] BusAlloc: pool not ready\r\n");
+        printk("BusAlloc: pool not ready\r\n");
         return NULL;
     }
 
     _PPciBus Bus = (_PPciBus)ExAllocatePoolZeroed(sizeof(_PciBus));
     if (Bus == NULL) {
-        printk("[PCI] BusAlloc: out of memory\r\n");
+        printk("BusAlloc: out of memory\r\n");
         return NULL;
     }
 
@@ -72,7 +72,7 @@ _PPciBus PciRootBusCreate(
 	Bus->Number = BusNr;
 	Bus->Parent = NULL;
 
-	printk("[PCI] root bus %04x:%02x created\r\n", Domain, BusNr);
+	printk("Root Bus %04x:%02x Created\r\n", Domain, BusNr);
     return Bus;
 }
 

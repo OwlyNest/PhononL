@@ -43,12 +43,15 @@ SHSTATUS PciInit(VOID) {
 	PciHostInit();
 	Kbr();
 
-	printk("[PCI] Starting enumeration\r\n");
+	PciMcfgInit();
+    Kbr();
+
+	printk("Starting enumeration\r\n");
 	Kbr();
 
 	SHSTATUS Rc = PciEnumerate();
 	if (Rc < 0) {
-		printk("[PCI] enumeration failed (%d)\r\n", Rc);
+		printk("Enumeration failed (%d)\r\n", Rc);
         return Rc;
 	}
 

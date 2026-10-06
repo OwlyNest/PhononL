@@ -27,6 +27,23 @@
 #define PCI_DEV(devfn)          (((devfn) >> 3) & 0x1f)
 #define PCI_FUNC(devfn)         ((devfn) & 0x07)   
 
+#define PCI_IS_BRIDGE(Hdr)      ((Hdr & 0x7F) == 0x01)
+
+#define PCI_IO_WINDOW_START     0x1000ULL
+#define PCI_IO_WINDOW_END       0xE000ULL
+
+#define PCI_MEM32_START         0x80000000ULL
+#define PCI_MEM32_END           0xE0000000ULL
+
+#define PCI_MEM64_START         0x100000000ULL
+#define PCI_MEM64_END           0x140000000ULL
+
+#define PCI_REG_COMMAND     0x04
+#define PCI_REG_BAR0        0x10
+
+#define PCI_CMD_IO          0x0001U
+#define PCI_CMD_MEM         0x0002U
+
 /* --- Includes ---*/
 
 /* --- Typedefs - Structs - Enums ---*/

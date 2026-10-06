@@ -6,6 +6,12 @@ if ($LASTEXITCODE -eq 0 || $LASTEXITCODE -ge 2) {
     $failed++;
 }
 
+Write-Host "[X] test $($testnr++): type includes"
+find Shadow -path '*.ps1' -prune -o -type f -print0 | xargs -0 grep -H "#include \"Internal/Types.H\"" > /dev/null
+if ($LASTEXITCODE -eq 0 || $LASTEXITCODE -ge 2) {
+    $failed++;
+}
+
 if ($failed -gt 0) {
     Write-Error "[!] $failed tests failed"
     exit $failed

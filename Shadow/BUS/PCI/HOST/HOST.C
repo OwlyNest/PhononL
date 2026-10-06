@@ -135,6 +135,6 @@ static _PciOps LegacyOps = {
 };
 
 VOID PciHostInit(VOID) {
-    printk("[PCI] Host: registering legacy CF8/CFC ops\r\n");
+    printk("Host: registering legacy CF8/CFC ops\r\n");
     PciConfigOpsRegister(&LegacyOps);
 }

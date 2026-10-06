@@ -36,11 +36,11 @@ VOID PciConfigOpsRegister(
 	IN _PPciOps Ops
 ) {
 	if (Ops == NULL) {
-		printk("[PCI] ConfigOpsRegister: NULL Ops\r\n");
+		printk("ConfigOpsRegister: NULL Ops\r\n");
 		return;
 	}
 	CurrentOps = *Ops;
-	printk("[PCI] Config ops registered\r\n");
+	printk("Config ops registered\r\n");
 }
 
 

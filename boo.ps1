@@ -285,7 +285,39 @@ $qemuArgs = @(
     "-d", "int,cpu_reset"
 )
 
-& qemu-system-x86_64 @qemuArgs
+$qemuDevices = @(
+    # Network
+    "-device", "e1000e",
+    "-device", "virtio-net-pci",
+    "-device", "rtl8139",
+
+    # Storage
+    "-device", "virtio-scsi-pci,id=scsi0",
+    "-drive", "file=disk.img,format=raw,if=none,id=disk0",
+    "-device", "virtio-blk-pci,drive=disk0",
+
+    # Random useful-ish things
+    "-device", "virtio-rng-pci",
+    "-device", "virtio-balloon-pci",
+
+    # GPU-ish things
+    "-device", "VGA",
+
+    # USB
+    "-device", "nec-usb-xhci",
+
+    # Audio
+    "-device", "ich9-intel-hda",
+    "-device", "hda-duplex"
+
+    # Bridges
+    "-device", "pci-bridge,id=bridge1,chassis_nr=1",
+    "-device", "pci-bridge,id=bridge2,chassis_nr=2"
+    "-device", "e1000e,bus=bridge1",
+    "-device", "rtl8139,bus=bridge2"
+)
+
+& qemu-system-x86_64 @qemuArgs @qemuDevices
 
 $qemuExit = $LASTEXITCODE
 switch ($qemuExit) {

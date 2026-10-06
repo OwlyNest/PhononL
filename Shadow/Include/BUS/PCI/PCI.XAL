@@ -26,7 +26,8 @@ XAL_METHOD(VOID,         PciDevRemove,           (IN _PPciDev Dev))
 XAL_METHOD(_PPciDev,     PciDevGet,              (IN _PPciDev Dev))
 XAL_METHOD(VOID,         PciDevPut,              (IN _PPciDev Dev))
 XAL_METHOD(VOID,         PciSetDrvData,          (IN _PPciDev Dev, IN PVOID Data))
-XAL_METHOD(PVOID,       PciGetDrvData,           (IN _PPciDev Dev))
+XAL_METHOD(PVOID,        PciGetDrvData,          (IN _PPciDev Dev))
+XAL_METHOD(VOID,         PciDecodeClass,         (IN _PPciDev Dev))
 
 /* ENUM.C */
 XAL_METHOD(SHSTATUS,     PciScanBus,             (IN _PPciBus Bus))
@@ -50,10 +51,10 @@ XAL_METHOD(UINT,         PciFindNextExtCapability,(_PPciDev Dev, UINT Pos, UINT 
 XAL_METHOD(VOID,         PciCapabilityWalk,      (_PPciDev Dev, _PciCapWalkFn Fn, PVOID Ctx))
 
 /* RESOURCE.C */
-XAL_METHOD(INT,          PciReadBases,           (_PPciDev Dev))
-XAL_METHOD(INT,          PciAssignResource,      (_PPciDev Dev, UINT Bar))
-XAL_METHOD(INT,          PciAssignUnassignedResources, (_PPciBus Bus))
-XAL_METHOD(INT,          PciUpdateResource,      (_PPciDev Dev, UINT Bar))
+XAL_METHOD(SHSTATUS,     PciReadBases,           (IN _PPciDev Dev))
+XAL_METHOD(SHSTATUS,     PciAssignResource,      (IN _PPciDev Dev, IN UINT BARIdx))
+XAL_METHOD(SHSTATUS,     PciAssignUnassignedResources, (IN _PPciBus Bus))
+XAL_METHOD(SHSTATUS,     PciUpdateResource,      (IN _PPciDev Dev, IN UINT BARIdx))
 
 /* IRQ.C */
 XAL_METHOD(UINT,         PciReadIrqLine,         (_PPciDev Dev))
@@ -72,6 +73,11 @@ XAL_METHOD(INT,          PciRescanBridge,        (_PPciDev Bridge))
 XAL_METHOD(VOID,         PciHostInit,            (VOID))
 
 /* --- ACPI --- */
+
+/* MCFG.C */
+XAL_METHOD(SHSTATUS,        PciMcfgInit,        (VOID))
+XAL_METHOD(_PPciEcamRegion, PciEcamLookup,      (IN UINT Segment, IN UINT Bus))
+XAL_METHOD(UINT,            PciEcamRegionCount, (VOID))
 
 /* --- BRIDGE --- */
 
